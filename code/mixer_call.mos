@@ -1,0 +1,11 @@
+loadModel(Modelica);
+cd("../models");
+
+loadFile("Source.mo");
+loadFile("Sink.mo");
+loadFile("Mixer.mo");
+loadFile("Plant.mo");
+
+cd("../data/ds2");
+print("simulation started...");
+simulate(processPlant, startTime=0 , stopTime=1000 , numberOfIntervals=100 , outputFormat="csv", simflags="-maxIntegrationOrder=1");

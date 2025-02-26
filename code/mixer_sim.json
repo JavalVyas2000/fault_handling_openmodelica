@@ -1,0 +1,56 @@
+{
+  "ds5": {
+    "ds_name": "ds2",
+    "model": {
+      "modules": {
+        "mixer0": {
+          "files": "../models/Mixer.mo",
+          "faults": {
+            "anom_leaking": false,
+            "anom_clogging": false,
+            "anom_valve_in0": false,
+            "anom_valve_in1": false,
+            "anom_valve_in2": false,
+            "anom_valve_out0": false,
+            "anom_pump90": false,
+            "anom_pump70": false
+          },
+          "init_states": {
+            "B201_level": 0.015,
+            "B202_level": 0.025,
+            "B203_level": 0.035,
+            "B204_level": 0.01
+          }
+        },
+        "source0": {
+          "files": "../models/Source.mo",
+          "faults": {}
+        },
+        "source1": {
+          "files": "../models/Source.mo",
+          "faults": {}
+        },
+        "source2": {
+          "files": "../models/Source.mo",
+          "faults": {}
+        },
+        "sink0": {
+          "files": "../models/Sink.mo",
+          "faults": {}
+        }
+        
+      },
+      "edges": {
+        "0": ["source0.port_out0", "mixer0.port_in0"],
+        "1": ["source1.port_out0", "mixer0.port_in1"],
+        "2": ["source2.port_out0", "mixer0.port_in2"],
+        "3": ["mixer0.port_out0", "sink0.port_in0"]
+      }
+    },
+    "sim_setup": {
+      "startTime": 0,
+      "stopTime": 1000,
+      "numberOfIntervals": 100
+    }
+  }
+}
