@@ -34,7 +34,7 @@ class PlantOperatorCrew:
     agents_config = "C:/Users/jv624/Desktop/fault_handling_openmodelica/code/crew/config/agents.yaml"
     tasks_config = "C:/Users/jv624/Desktop/fault_handling_openmodelica/code//crew/config/tasks.yaml"
 
-    llm = ChatOpenAI(model="gpt-4o-mini")
+    llm = ChatOpenAI(model="gpt-4o")
     @agent
     def plant_operator(self) -> Agent:
         return Agent(
@@ -103,7 +103,19 @@ if __name__ == "__main__":
     for sim_time in range(10):
         with open('mixer_sim.json') as f:
             setup = json.load(f)
-            
+        
+        if sim_time==0:
+            setup['ds1']['model']['modules']['mixer0']['init_states']['B201_level']=B201_level
+            setup['ds1']['model']['modules']['mixer0']['init_states']['B202_level']=B202_level
+            setup['ds1']['model']['modules']['mixer0']['init_states']['B203_level']=B203_level
+            setup['ds1']['model']['modules']['mixer0']['init_states']['B204_level']=B204_level
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in0_input']=valve_in0
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in1_input']=valve_in1
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in2_input']=valve_in2
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_out_input']=valve_out
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B201_input']=valve_pump_tank_B201
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B202_input']=valve_pump_tank_B202
+            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B203_input']=valve_pump_tank_B203
         for i in setup:
             run_sim(sim_setup=setup[i], modus='hybrid', states=True)
         

@@ -18,12 +18,10 @@ plant_operation:
     2. Once **B201** reaches its maximum capacity, close **valve_in0** and open **valve_in1** to fill **tank B202** to maximum of 0.033m.
     3. Once **B202** reaches its maximum capacity, close **valve_in1** and open **valve_in2** to fill **tank B203** to maximum of 0.033m.
     4. Once **B203** is full, all three tanks are ready for emptying.
-
     5. Open **valve_pump_tank_B201** to transfer liquid from **B201 to B204**.
     6. Once **B201** is empty, close **valve_pump_tank_B201** and open **valve_pump_tank_B202** to empty **B202** into **B204**.
     7. Once **B202** is empty, close **valve_pump_tank_B202** and open **valve_pump_tank_B203** to empty **B203** into **B204**.
     8. Once **B203** is empty, all liquids have been mixed in **B204**.
-
     9. Open **valve_out** to empty the mixed liquid from **B204** as required.
 
     **Current State:**
@@ -40,9 +38,11 @@ plant_operation:
     - The valve_pump_tank_B204 is {valve_pump_tank_B204} 
     - The valve_out is {valve_out}
 
+    Strictly follow the steps in that order. Do not skip a step. 
     If there are no actions required from the agent as the levels have not hit the max or min, do not do anything and return the same state the valves are in. 
 
     **Expected Action:**
+    - The agent should strictly follow the operational procedure.
     - The agent should provide a list of operations at the current moment if any changes are required.
     - The agent should provide a clear reasoning process for each action and thought process.
 
