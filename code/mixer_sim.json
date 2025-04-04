@@ -7,7 +7,7 @@
                     "files": "../models/Mixer.mo",
                     "faults": {
                         "anom_leaking": false,
-                        "anom_clogging": false,
+                        "anom_clogging": true,
                         "anom_valve_in0": false,
                         "anom_valve_in1": false,
                         "anom_valve_in2": false,
@@ -26,7 +26,8 @@
                         "valve_out_input": 0,
                         "valve_pump_tank_B201_input": 1,
                         "valve_pump_tank_B202_input": 0,
-                        "valve_pump_tank_B203_input": 0
+                        "valve_pump_tank_B203_input": 0,
+                        "pump_n_in": 30
                     }
                 },
                 "source0": {

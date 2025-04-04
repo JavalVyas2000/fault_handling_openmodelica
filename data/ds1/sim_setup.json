@@ -25,7 +25,8 @@
                     "valve_out_input": 1,
                     "valve_pump_tank_B201_input": 1,
                     "valve_pump_tank_B202_input": 0,
-                    "valve_pump_tank_B203_input": 0
+                    "valve_pump_tank_B203_input": 0,
+                    "pump_n_in": 30
                 }
             },
             "source0": {

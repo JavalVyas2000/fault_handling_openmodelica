@@ -5,7 +5,7 @@ from crewai.project import CrewBase, agent, crew, task
 from pydantic import BaseModel, Field
 import json
 from langchain_openai import ChatOpenAI
-from load_dotenv import load_dotenv
+from dotenv import load_dotenv
 load_dotenv()
 
 import sys
