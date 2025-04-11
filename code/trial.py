@@ -34,7 +34,7 @@ class PlantOperatorCrew:
     agents_config = "C:/Users/jv624/Desktop/fault_handling_openmodelica/code/crew/config/agents.yaml"
     tasks_config = "C:/Users/jv624/Desktop/fault_handling_openmodelica/code//crew/config/tasks.yaml"
 
-    llm = ChatOpenAI(model="gpt-4o")
+    llm = ChatOpenAI(model="gpt-4o-mini")
     @agent
     def plant_operator(self) -> Agent:
         return Agent(
