@@ -18,11 +18,12 @@ plant_operation:
     2. Once **B201** reaches its maximum capacity, close **valve_in0** and open **valve_in1** to fill **tank B202** to maximum of 0.033m.
     3. Once **B202** reaches its maximum capacity, close **valve_in1** and open **valve_in2** to fill **tank B203** to maximum of 0.033m.
     4. Once **B203** is full, all three tanks are ready for emptying.
-    5. Open **valve_pump_tank_B201** to transfer liquid from **B201 to B204**.
-    6. Once **B201** is empty, close **valve_pump_tank_B201** and open **valve_pump_tank_B202** to empty **B202** into **B204**.
-    7. Once **B202** is empty, close **valve_pump_tank_B202** and open **valve_pump_tank_B203** to empty **B203** into **B204**.
-    8. Once **B203** is empty, all liquids have been mixed in **B204**.
-    9. Open **valve_out** to empty the mixed liquid from **B204** as required.
+    5. Open **valve_pump_tank_B204** to fill **B204** and keep it open while emptying **B201, B202, and B203**.
+    6. Open **valve_pump_tank_B201** to transfer liquid from **B201 to B204**.
+    7. Once **B201** reaches min value of 0.022m, close **valve_pump_tank_B201** and open **valve_pump_tank_B202** to empty **B202** into **B204** till **B202** reaches reaches min value of 0.022m.
+    8. Once **B202** reaches min value of 0.022m, close **valve_pump_tank_B202** and open **valve_pump_tank_B203** to empty **B203** into **B204** till **B203** reaches reaches min value of 0.022m.
+    9. Once **B203** reaches min value of 0.022m, all liquids have been mixed in **B204**.
+    10. Open **valve_out** to empty the mixed liquid from **B204** till it reaches a min level of 0.22m.
 
     **Current State:**
     - The level of tank B201 is {B201_level}m 
