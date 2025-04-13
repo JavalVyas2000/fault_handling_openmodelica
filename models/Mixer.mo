@@ -9,17 +9,18 @@ model mixerModule
   parameter Real pump_P101_head_middle = 1.534;
   parameter Real pump_P101_head_min = 1.022;
   // configurable parameters
-  parameter Real B201_level = 0.0330000001033;
-  parameter Real B202_level = 0.0330000001033;
-  parameter Real B203_level = 0.0280276254561542;
-  parameter Real B204_level = 0.01;
+  parameter Real B201_level = 0.033;
+  parameter Real B202_level = 0.033;
+  parameter Real B203_level = 0.033;
+  parameter Real B204_level = 0.022;
   parameter Real valve_in0_input = 0;
   parameter Real valve_in1_input = 0;
-  parameter Real valve_in2_input = 1;
-  parameter Real valve_out_input = 1;
+  parameter Real valve_in2_input = 0;
+  parameter Real valve_out_input = 0;
   parameter Real valve_pump_tank_B201_input = 1;
   parameter Real valve_pump_tank_B202_input = 0;
   parameter Real valve_pump_tank_B203_input = 0;
+  parameter Real valve_pump_tank_B204_input = 1;
   // anomalies
   parameter Boolean anom_leaking = false;
   parameter Boolean anom_clogging = false;
@@ -33,7 +34,7 @@ model mixerModule
   parameter Real var_valve_in1 = if anom_valve_in1 then 0.2 else 0.0;
   parameter Real var_valve_in2 = if anom_valve_in2 then 0.2 else 0.0;
   parameter Real var_valve_out = if anom_valve_out then 0.2 else 0.0;
-  parameter Real var_pump_n = if anom_pump70 then 0.7 else if anom_pump90 then 0.9 else 1.0;
+  parameter Real var_pump_n = if anom_pump70 then 0.7 else if anom_pump90 then 0.9 else 1;
   Real pump_n_in;
   // ports
   Modelica.Fluid.Interfaces.FluidPort_a port_in0(redeclare package Medium = Medium) annotation(
@@ -224,11 +225,12 @@ equation
   valve_pump_tank_B201.opening = if state_emptying_tank_B201.active and valve_pump_tank_B201_input > 0.5 then 1.0 else 0.0;
   valve_pump_tank_B202.opening = if state_emptying_tank_B202.active and valve_pump_tank_B202_input > 0.5 then 1.0 else 0.0;
   valve_pump_tank_B203.opening = if state_emptying_tank_B203.active and valve_pump_tank_B203_input > 0.5 then 1.0 else 0.0;
-  valve_pump_tank_B204.opening = if state_emptying_tank_B201.active then 1.0 elseif state_emptying_tank_B202.active then 1.0
-   elseif state_emptying_tank_B203.active then 1.0 else 0.0;
-  pump_n_in = if state_emptying_tank_B201.active then 150.0*var_pump_n elseif state_emptying_tank_B202.active then 150.0*var_pump_n
-   elseif state_emptying_tank_B203.active then 150.0*var_pump_n else 0.0;
-  valve_out.opening = if state_emptying_tank_B204.active then 1.0 else 0.0;
+  valve_pump_tank_B204.opening = if state_emptying_tank_B201.active and valve_pump_tank_B204_input > 0.5 then 1.0 elseif state_emptying_tank_B204.active and valve_pump_tank_B202_input > 0.5 then 1.0
+   elseif state_emptying_tank_B203.active and valve_pump_tank_B204_input > 0.5 then 1.0 else 0.0;
+   
+  pump_n_in = if state_emptying_tank_B201.active and valve_pump_tank_B201_input > 0.5 then 150.0*var_pump_n elseif state_emptying_tank_B202.active and valve_pump_tank_B202_input > 0.5 then 150.0*var_pump_n
+   elseif state_emptying_tank_B203.active and valve_pump_tank_B203_input > 0.5 then 150.0*var_pump_n else 0.0;
+  valve_out.opening = if state_emptying_tank_B204.active and valve_out_input > 0.5 then 1.0 else 0.0;
 // anomalies
   leaking_valve.opening = if anom_leaking then 0.8 else 0.0;
   clogging_valve.opening = if anom_clogging then 0.2 else 1.0;
