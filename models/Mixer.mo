@@ -9,18 +9,22 @@ model mixerModule
   parameter Real pump_P101_head_middle = 1.534;
   parameter Real pump_P101_head_min = 1.022;
   // configurable parameters
-  parameter Real B201_level = 0.033;
+  parameter Real B201_level = 0.0219999998977998;
   parameter Real B202_level = 0.033;
   parameter Real B203_level = 0.033;
-  parameter Real B204_level = 0.022;
+  parameter Real B204_level = 0.0331281487708265;
   parameter Real valve_in0_input = 0;
   parameter Real valve_in1_input = 0;
   parameter Real valve_in2_input = 0;
   parameter Real valve_out_input = 0;
-  parameter Real valve_pump_tank_B201_input = 1;
-  parameter Real valve_pump_tank_B202_input = 0;
+  parameter Real valve_pump_tank_B201_input = 0;
+  parameter Real valve_pump_tank_B202_input = 1;
   parameter Real valve_pump_tank_B203_input = 0;
   parameter Real valve_pump_tank_B204_input = 1;
+  Boolean force_full_tank_B201_transition;
+  Boolean force_full_tank_B202_transition;
+  Boolean force_full_tank_B203_transition;
+  parameter Integer init_state = 3;
   // anomalies
   parameter Boolean anom_leaking = false;
   parameter Boolean anom_clogging = false;
@@ -212,9 +216,15 @@ model mixerModule
   Modelica.Fluid.Pipes.StaticPipe pipe7(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005) annotation(
     Placement(transformation(origin = {-110, -130}, extent = {{-10, 10}, {10, -10}})));
 equation
-  condition_is_full_tank_B201.condition = tank_B201.level >= tank_B201.height*tankMaxVol;
-  condition_is_full_tank_B202.condition = tank_B202.level >= tank_B202.height*tankMaxVol;
-  condition_is_full_tank_B203.condition = tank_B203.level >= tank_B203.height*tankMaxVol;
+  force_full_tank_B201_transition = init_state<>0;
+  force_full_tank_B202_transition = init_state<>1;
+  force_full_tank_B203_transition = init_state<>2;
+  condition_is_full_tank_B201.condition = 
+  (tank_B201.level >= tank_B201.height*tankMaxVol) or force_full_tank_B201_transition;
+  condition_is_full_tank_B202.condition = 
+  (tank_B202.level >= tank_B202.height*tankMaxVol) or force_full_tank_B202_transition;
+  condition_is_full_tank_B203.condition = 
+  (tank_B203.level >= tank_B203.height*tankMaxVol) or force_full_tank_B203_transition;
   condition_is_empty_tank_B201.condition = tank_B201.level <= tank_B201.height*tankMinVol;
   condition_is_empty_tank_B202.condition = tank_B202.level <= tank_B202.height*tankMinVol;
   condition_is_empty_tank_B203.condition = tank_B203.level <= tank_B203.height*tankMinVol;
@@ -225,7 +235,7 @@ equation
   valve_pump_tank_B201.opening = if state_emptying_tank_B201.active and valve_pump_tank_B201_input > 0.5 then 1.0 else 0.0;
   valve_pump_tank_B202.opening = if state_emptying_tank_B202.active and valve_pump_tank_B202_input > 0.5 then 1.0 else 0.0;
   valve_pump_tank_B203.opening = if state_emptying_tank_B203.active and valve_pump_tank_B203_input > 0.5 then 1.0 else 0.0;
-  valve_pump_tank_B204.opening = if state_emptying_tank_B201.active and valve_pump_tank_B204_input > 0.5 then 1.0 elseif state_emptying_tank_B204.active and valve_pump_tank_B202_input > 0.5 then 1.0
+  valve_pump_tank_B204.opening = if state_emptying_tank_B201.active and valve_pump_tank_B204_input > 0.5 then 1.0 elseif state_emptying_tank_B202.active and valve_pump_tank_B204_input > 0.5 then 1.0
    elseif state_emptying_tank_B203.active and valve_pump_tank_B204_input > 0.5 then 1.0 else 0.0;
    
   pump_n_in = if state_emptying_tank_B201.active and valve_pump_tank_B201_input > 0.5 then 150.0*var_pump_n elseif state_emptying_tank_B202.active and valve_pump_tank_B202_input > 0.5 then 150.0*var_pump_n

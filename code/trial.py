@@ -62,10 +62,10 @@ class PlantOperatorCrew:
         )
 
 if __name__ == "__main__":
-    B201_level = 0.02
-    B202_level = 0.02
-    B203_level = 0.02
-    B204_level = 0.02
+    B201_level = 0.033
+    B202_level = 0.033
+    B203_level = 0.033
+    B204_level = 0.022
     valve_in0 = 0
     valve_in1 = 0
     valve_in2 = 0
@@ -74,6 +74,7 @@ if __name__ == "__main__":
     valve_pump_tank_B202 = 0
     valve_pump_tank_B203 = 0
     valve_pump_tank_B204 = 0
+    init_state = 3
 
     message = []
     B201_level_list = []
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     df_history = pd.DataFrame()
 
     
-    for sim_time in range(15):
+    for sim_time in range(5):
         print(f"Simulation time: {sim_time}")
         with open('mixer_sim.json') as f:
             setup = json.load(f)
@@ -126,11 +127,11 @@ if __name__ == "__main__":
         B202_level = df['mixer0.tank_B202.level'].iloc[-1]
         B203_level = df['mixer0.tank_B203.level'].iloc[-1]
         B204_level = df['mixer0.tank_B204.level'].iloc[-1]
-        B201_level_list.append(df['mixer0.tank_B201.level'].iloc[-1])
-        B202_level_list.append(df['mixer0.tank_B202.level'].iloc[-1])
-        B203_level_list.append(df['mixer0.tank_B203.level'].iloc[-1])
-        B204_level_list.append(df['mixer0.tank_B204.level'].iloc[-1])
-
+        B201_level_list.append(B201_level)
+        B202_level_list.append(B202_level)
+        B203_level_list.append(B203_level)
+        B204_level_list.append(B204_level)
+        print(B201_level, B202_level, B203_level, B204_level)
         res = PlantOperatorCrew().crew().kickoff(inputs={"B201_level": B201_level, 
                                                     "B202_level": B202_level, 
                                                     "B203_level": B203_level, 
@@ -147,6 +148,10 @@ if __name__ == "__main__":
         print(res['cot'])
         print(res['valve_in0'])
         print(res['valve_in1'])
+        print(res['valve_pump_tank_B201'])
+        print(res['valve_pump_tank_B202'])
+        print(res['valve_pump_tank_B203'])
+        print(res['valve_pump_tank_B204'])
         valve_in0 = 1 if res['valve_in0'] else 0
         valve_in1 = 1 if res['valve_in1'] else 0
         valve_in2 = 1 if res['valve_in2'] else 0
@@ -179,7 +184,7 @@ if __name__ == "__main__":
         itr_input_tokens_list.append(itr_input_tokens)
         itr_output_tokens_list.append(itr_output_tokens)
         itr_token_list.append(itr_token)
-        df = pd.read_csv('../data/ds1/ds1_hybrid_s.csv')
+        # df = pd.read_csv('../data/ds1/ds1_hybrid_s.csv')
         print(B201_level, B202_level, B203_level, B204_level)
         df_history = pd.concat([df_history,df])
 
