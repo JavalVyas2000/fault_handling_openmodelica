@@ -62,9 +62,9 @@ class PlantOperatorCrew:
         )
 
 if __name__ == "__main__":
-    B201_level = 0.033
-    B202_level = 0.033
-    B203_level = 0.033
+    B201_level = 0.022
+    B202_level = 0.022
+    B203_level = 0.022
     B204_level = 0.022
     valve_in0 = 0
     valve_in1 = 0
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     valve_pump_tank_B202 = 0
     valve_pump_tank_B203 = 0
     valve_pump_tank_B204 = 0
-    init_state = 3
+    init_state = 0
 
     message = []
     B201_level_list = []
@@ -95,13 +95,14 @@ if __name__ == "__main__":
     itr_input_tokens_list = []
     itr_output_tokens_list = []
     itr_token_list = []
+    init_state_list = []
     total_tokens = 0
     total_input_tokens = 0
     total_output_tokens = 0
     df_history = pd.DataFrame()
 
     
-    for sim_time in range(5):
+    for sim_time in range(20):
         print(f"Simulation time: {sim_time}")
         with open('mixer_sim.json') as f:
             setup = json.load(f)
@@ -119,14 +120,41 @@ if __name__ == "__main__":
             setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B202_input']=valve_pump_tank_B202
             setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B203_input']=valve_pump_tank_B203
             setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B204_input']=valve_pump_tank_B204
+            setup['ds1']['model']['modules']['mixer0']['init_states']['init_state']=init_state
+
         for i in setup:
             run_sim(sim_setup=setup[i], modus='hybrid', states=True)
         
         df = pd.read_csv('../data/ds1/ds1_hybrid_s.csv')
-        B201_level = df['mixer0.tank_B201.level'].iloc[-1]
-        B202_level = df['mixer0.tank_B202.level'].iloc[-1]
-        B203_level = df['mixer0.tank_B203.level'].iloc[-1]
-        B204_level = df['mixer0.tank_B204.level'].iloc[-1]
+
+        cols = ['mixer0.state_filling_tank_B201.active','mixer0.state_filling_tank_B202.active','mixer0.state_filling_tank_B203.active','mixer0.state_emptying_tank_B201.active','mixer0.state_emptying_tank_B202.active','mixer0.state_emptying_tank_B203.active','mixer0.state_emptying_tank_B204.active']
+        
+        if B201_level<0.032 and B202_level<0.032 and B203_level<0.032 and B204_level<0.023: #### Filling tank B201
+            init_state = 0
+        elif B201_level>0.032 and B202_level<0.032 and B203_level<0.032 and B204_level<0.023: #### Filling tank B202
+            init_state = 1
+        elif B201_level>0.032 and B202_level>0.032 and B203_level<0.032 and B204_level<0.023: #### Filling tank B203
+            init_state = 2
+        elif B204_level>0.021 and B204_level<0.032: ### State emptying tank B201
+            init_state = 3
+        elif B204_level>0.032 and B204_level<0.045: ### State emptying tank B202
+            init_state = 4
+        elif B204_level>0.043 and B204_level<0.056: ### State emptying tank B203
+            init_state = 5
+        elif B204_level<0.056: ### State emptying tank B204
+            init_state = 6
+        print(B201_level, B202_level, B203_level, B204_level)
+        print(f'init_state - {init_state}')
+        try:
+            B201_level = df['mixer0.tank_B201.level'].iloc[-1]
+            B202_level = df['mixer0.tank_B202.level'].iloc[-1]
+            B203_level = df['mixer0.tank_B203.level'].iloc[-1]
+            B204_level = df['mixer0.tank_B204.level'].iloc[-1]
+        except:
+            print(f'Simtume : {sim_time}')
+            print('Did not produce a valid output')
+            continue
+        init_state_list.append(init_state)
         B201_level_list.append(B201_level)
         B202_level_list.append(B202_level)
         B203_level_list.append(B203_level)
@@ -208,6 +236,7 @@ if __name__ == "__main__":
         setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B202_input']=1 if res['valve_pump_tank_B202'] else 0
         setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B203_input']=1 if res['valve_pump_tank_B203'] else 0
         setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B204_input']=1 if res['valve_pump_tank_B204'] else 0
+        setup['ds1']['model']['modules']['mixer0']['init_states']['init_state']=init_state
         with open("mixer_sim.json", "w") as json_file:
             json.dump(setup, json_file, indent=4)
     df = pd.DataFrame({ 'message': message,
@@ -223,6 +252,7 @@ if __name__ == "__main__":
                         'valve_pump_tank_B202': valve_pump_tank_B202_list,
                         'valve_pump_tank_B203': valve_pump_tank_B203_list,
                         'valve_pump_tank_B204': valve_pump_tank_B204_list,
+                        'init_state': init_state_list,
                         'total_input_tokens': total_input_tokens_list,
                         'total_output_tokens': total_output_tokens_list,
                         'total_tokens': total_tokens_list,
