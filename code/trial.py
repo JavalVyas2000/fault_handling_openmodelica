@@ -62,19 +62,19 @@ class PlantOperatorCrew:
         )
 
 if __name__ == "__main__":
-    B201_level = 0.022
-    B202_level = 0.022
-    B203_level = 0.022
+    B201_level = 0.033
+    B202_level = 0.033
+    B203_level = 0.033
     B204_level = 0.022
     valve_in0 = 0
     valve_in1 = 0
     valve_in2 = 0
     valve_out = 0
-    valve_pump_tank_B201 = 0
+    valve_pump_tank_B201 = 1
     valve_pump_tank_B202 = 0
     valve_pump_tank_B203 = 0
-    valve_pump_tank_B204 = 0
-    init_state = 0
+    valve_pump_tank_B204 = 1
+    init_state = 3
 
     message = []
     B201_level_list = []
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     df_history = pd.DataFrame()
 
     
-    for sim_time in range(20):
+    for sim_time in range(2):
         print(f"Simulation time: {sim_time}")
         with open('mixer_sim.json') as f:
             setup = json.load(f)
@@ -160,6 +160,7 @@ if __name__ == "__main__":
         B203_level_list.append(B203_level)
         B204_level_list.append(B204_level)
         print(B201_level, B202_level, B203_level, B204_level)
+        fault=''
         res = PlantOperatorCrew().crew().kickoff(inputs={"B201_level": B201_level, 
                                                     "B202_level": B202_level, 
                                                     "B203_level": B203_level, 
@@ -171,7 +172,8 @@ if __name__ == "__main__":
                                                     "valve_pump_tank_B201": valve_pump_tank_B201, 
                                                     "valve_pump_tank_B202": valve_pump_tank_B202, 
                                                     "valve_pump_tank_B203": valve_pump_tank_B203, 
-                                                    "valve_pump_tank_B204": valve_pump_tank_B204})
+                                                    "valve_pump_tank_B204": valve_pump_tank_B204,
+                                                    "fault_detected": fault})
         
         print(res['cot'])
         print(res['valve_in0'])
