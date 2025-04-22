@@ -40,6 +40,7 @@
       - The valve_pump_tank_B203 is {valve_pump_tank_B203} 
       - The valve_pump_tank_B204 is {valve_pump_tank_B204} 
       - The valve_out is {valve_out}
+      - The pump power is {pump_power} times of max pump power of 750W.
 
       Strictly follow the steps in that order. Do not skip a step. 
       If there are no actions required from the agent as the levels have not hit the max or min, do not do anything and return the same state the valves are in. 
@@ -49,12 +50,15 @@
       - The agent has to determine a solution strategy and how it would manipulate the valves and the pump power to overcome the clogging anomaly.
       - The actions that the agent can take are based on the actuators available in the system. i.e. position of valves and pump power.
 
-      If a fault is detected, the monitoring agent will mention the fault in the system and agent should adjust for it. Fault detected = {}
+      If a fault is detected, the monitoring agent will mention the fault in the system and agent should adjust for it. Fault detected = {fault_detected}
+      
       **Expected Action:**
       - The agent should strictly follow the operational procedure.
       - The agent should provide a list of operations at the current moment if any changes are required.
       - The agent should provide a clear reasoning process for each action and thought process.
 
+      **Suggestions for Agent:**
+      {reprompting_suggestions}
       **Example Action:**
       - If **B201** is empty, the agent should return: `valve_pump_tank_B201 - close`.
 
