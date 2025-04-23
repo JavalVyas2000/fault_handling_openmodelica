@@ -92,6 +92,7 @@ class ExampleState(BaseModel):
     max_itr:int = 3
     reprompt:int = 0
     fault_detected:str = ''
+    iterations:int = 0
     # df_history:pd.DataFrame = pd.DataFrame()
 
 
@@ -114,7 +115,12 @@ class RouterFlow(Flow[ExampleState]):
         self.state.pump_power = plant_states['pump_power']
         self.state.anom_clogging = plant_states['anom_clogging']
         self.state.anom_valve_in0 = plant_states['anom_valve_in0']
+        self.state.init_state = plant_states['init_state']
 
+        if self.state.anom_clogging == 1:
+            self.state.fault_detected = 'clogging'
+        elif self.state.anom_valve_in0 == 1:
+            self.state.fault_detected = 'valve_in0 malfunction'
         self.state.plant_states= {
             'B201_level': 0.022,
             'B202_level': 0.022,
@@ -131,6 +137,7 @@ class RouterFlow(Flow[ExampleState]):
             'pump_power': 0.2,
             'anom_clogging': 1,
             'anom_valve_in0': 0,
+            'init_state': 0,
         }
     @listen(or_(initialize, "next_itr"))
     def monitoring_agent(self):
@@ -150,6 +157,7 @@ class RouterFlow(Flow[ExampleState]):
         self.state.pump_power = self.state.plant_states['pump_power']
         self.state.anom_clogging = self.state.plant_states['anom_clogging']
         self.state.anom_valve_in0 = self.state.plant_states['anom_valve_in0']
+        self.state.init_state = self.state.plant_states['init_state']
 
     @listen(or_(monitoring_agent, "iterate"))
     def action_agent(self):
@@ -159,19 +167,19 @@ class RouterFlow(Flow[ExampleState]):
             .crew()
             .kickoff(
                 inputs={
-                    "B201_level":self.state.B201_level,
-                    "B202_level":self.state.B202_level,
-                    "B203_level":self.state.B203_level,
-                    "B204_level":self.state.B204_level,
-                    "valve_in0":self.state.valve_in0,
-                    "valve_in1":self.state.valve_in1,
-                    "valve_in2":self.state.valve_in2,
-                    "valve_out":self.state.valve_out,
-                    "valve_pump_tank_B201":self.state.valve_pump_tank_B201,
-                    "valve_pump_tank_B202":self.state.valve_pump_tank_B202,
-                    "valve_pump_tank_B203":self.state.valve_pump_tank_B203,
-                    "valve_pump_tank_B204":self.state.valve_pump_tank_B204,
-                    "pump_power":self.state.pump_power,
+                    "B201_level":self.state.plant_states['B201_level'],
+                    "B202_level":self.state.plant_states['B202_level'],
+                    "B203_level":self.state.plant_states['B203_level'],
+                    "B204_level":self.state.plant_states['B204_level'],
+                    "valve_in0":self.state.plant_states['valve_in0'],
+                    "valve_in1":self.state.plant_states['valve_in1'],
+                    "valve_in2":self.state.plant_states['valve_in2'],
+                    "valve_out":self.state.plant_states['valve_out'],
+                    "valve_pump_tank_B201":self.state.plant_states['valve_pump_tank_B201'],
+                    "valve_pump_tank_B202":self.state.plant_states['valve_pump_tank_B202'],
+                    "valve_pump_tank_B203":self.state.plant_states['valve_pump_tank_B203'],
+                    "valve_pump_tank_B204":self.state.plant_states['valve_pump_tank_B204'],
+                    "pump_power":self.state.plant_states['pump_power'],
                     "fault_detected":self.state.fault_detected,
                     "reprompting_suggestions":self.state.reprompting_suggestions,
                 }
@@ -210,30 +218,20 @@ class RouterFlow(Flow[ExampleState]):
     @listen(action_agent)
     def digital_twin_agent(self):
         print('Digital Twin....')
+        print('Digital Twin States Before:')
+        print(self.state.digital_twin_states)
         print(f'anom_clogging: {self.state.anom_clogging}')
         print(f'anom_valve_in0: {self.state.anom_valve_in0}')
-        self.state.plant_states = {'B201_level': self.state.B201_level,
-                        'B202_level': self.state.B201_level,
-                        'B203_level': self.state.B203_level,
-                        'B204_level': self.state.B204_level,
-                        'valve_in0': self.state.valve_in0,
-                        'valve_in1': self.state.valve_in1,
-                        'valve_in2': self.state.valve_in2,
-                        'valve_out': self.state.valve_out,
-                        'valve_pump_tank_B201': self.state.valve_pump_tank_B201,
-                        'valve_pump_tank_B202': self.state.valve_pump_tank_B202,
-                        'valve_pump_tank_B203': self.state.valve_pump_tank_B203,
-                        'valve_pump_tank_B204': self.state.valve_pump_tank_B204,
-                        'pump_power': self.state.pump_power,
-                        'anom_clogging': self.state.anom_clogging,
-                        'anom_valve_in0': self.state.anom_valve_in0,}
         self.state.digital_twin_states = digital_twin(self.state.plant_states)
         
+        # self.state.plant_states['init_state']=self.state.digital_twin_states['init_state']
         print('Digital Twin States:')
         print(self.state.digital_twin_states)
+        print(self.state.plant_states)
 
     @router(digital_twin_agent)
     def validation_agent(self):
+        print('Validating....')
         if self.state.reprompt<self.state.max_itr:
             print('Validating....')
             self.state.action_valid, self.state.action_required = action_validation(self.state.digital_twin_states)
@@ -264,19 +262,19 @@ class RouterFlow(Flow[ExampleState]):
             .crew()
             .kickoff(
                 inputs={
-                    "B201_level":self.state.B201_level,
-                    "B202_level":self.state.B202_level,
-                    "B203_level":self.state.B203_level,
-                    "B204_level":self.state.B204_level,
-                    "valve_in0":self.state.valve_in0,
-                    "valve_in1":self.state.valve_in1,
-                    "valve_in2":self.state.valve_in2,
-                    "valve_out":self.state.valve_out,
-                    "valve_pump_tank_B201":self.state.valve_pump_tank_B201,
-                    "valve_pump_tank_B202":self.state.valve_pump_tank_B202,
-                    "valve_pump_tank_B203":self.state.valve_pump_tank_B203,
-                    "valve_pump_tank_B204":self.state.valve_pump_tank_B204,
-                    "pump_power":self.state.pump_power,
+                    "B201_level":self.state.plant_states['B201_level'],
+                    "B202_level":self.state.plant_states['B202_level'],
+                    "B203_level":self.state.plant_states['B203_level'],
+                    "B204_level":self.state.plant_states['B204_level'],
+                    "valve_in0":self.state.plant_states['valve_in0'],
+                    "valve_in1":self.state.plant_states['valve_in1'],
+                    "valve_in2":self.state.plant_states['valve_in2'],
+                    "valve_out":self.state.plant_states['valve_out'],
+                    "valve_pump_tank_B201":self.state.plant_states['valve_pump_tank_B201'],
+                    "valve_pump_tank_B202":self.state.plant_states['valve_pump_tank_B202'],
+                    "valve_pump_tank_B203":self.state.plant_states['valve_pump_tank_B203'],
+                    "valve_pump_tank_B204":self.state.plant_states['valve_pump_tank_B204'],
+                    "pump_power":self.state.plant_states['pump_power'],
                     "issue_flagged":self.state.issue_flagged,
                     "fault_detected":self.state.fault_detected,
                 }
@@ -294,44 +292,61 @@ class RouterFlow(Flow[ExampleState]):
     @router(or_("to_plant", "max_itr"))
     def pass_to_plant(self):
         print('Passing to plant....')
-        self.state.plant_states = {'B201_level': self.state.B201_level,
-                        'B202_level': self.state.B201_level,
-                        'B203_level': self.state.B203_level,
-                        'B204_level': self.state.B204_level,
-                        'valve_in0': self.state.valve_in0,
-                        'valve_in1': self.state.valve_in1,
-                        'valve_in2': self.state.valve_in2,
-                        'valve_out': self.state.valve_out,
-                        'valve_pump_tank_B201': self.state.valve_pump_tank_B201,
-                        'valve_pump_tank_B202': self.state.valve_pump_tank_B202,
-                        'valve_pump_tank_B203': self.state.valve_pump_tank_B203,
-                        'valve_pump_tank_B204': self.state.valve_pump_tank_B204,
-                        'pump_power': self.state.pump_power,
+        print('plant States Before:')
+        print(self.state.plant_states)
+        self.state.plant_states = {'B201_level': self.state.plant_states['B201_level'],
+                        'B202_level': self.state.plant_states['B201_level'],
+                        'B203_level': self.state.plant_states['B203_level'],
+                        'B204_level': self.state.plant_states['B204_level'],
+                        'valve_in0': self.state.plant_states['valve_in0'],
+                        'valve_in1': self.state.plant_states['valve_in1'],
+                        'valve_in2': self.state.plant_states['valve_in2'],
+                        'valve_out': self.state.plant_states['valve_out'],
+                        'valve_pump_tank_B201': self.state.plant_states['valve_pump_tank_B201'],
+                        'valve_pump_tank_B202': self.state.plant_states['valve_pump_tank_B202'],
+                        'valve_pump_tank_B203': self.state.plant_states['valve_pump_tank_B203'],
+                        'valve_pump_tank_B204': self.state.plant_states['valve_pump_tank_B204'],
+                        'pump_power': self.state.plant_states['pump_power'],
                         'anom_clogging': self.state.anom_clogging,
-                        'anom_valve_in0': self.state.anom_valve_in0,}
+                        'anom_valve_in0': self.state.anom_valve_in0,
+                        'init_state': self.state.init_state}
 
         self.state.plant_states = plant(self.state.plant_states)
         print('plant States:')
         print(self.state.plant_states)
+        # self.state.B201_level = self.state.plant_states['B201_level']
+        # self.state.B202_level = self.state.plant_states['B202_level']
+        # self.state.B203_level = self.state.plant_states['B203_level']
+        # self.state.B204_level = self.state.plant_states['B204_level']
+        # self.state.valve_in0 = self.state.plant_states['valve_in0']
+        # self.state.valve_in1 = self.state.plant_states['valve_in1']
+        # self.state.valve_in2 = self.state.plant_states['valve_in2']
+        # self.state.valve_out = self.state.plant_states['valve_out']
+        # self.state.valve_pump_tank_B201 = self.state.plant_states['valve_pump_tank_B201']
+        # self.state.valve_pump_tank_B202 = self.state.plant_states['valve_pump_tank_B202']
+        # self.state.valve_pump_tank_B203 = self.state.plant_states['valve_pump_tank_B203']
+        # self.state.valve_pump_tank_B204 = self.state.plant_states['valve_pump_tank_B204']
+        # self.state.pump_power = self.state.plant_states['pump_power']
 
         ### Add bookkeeping here
-        self.state.plant_valve_in0_list.append(self.state.valve_in0)
-        self.state.plant_valve_in1_list.append(self.state.valve_in1)
-        self.state.plant_valve_in2_list.append(self.state.valve_in2)
-        self.state.plant_valve_out_list.append(self.state.valve_out)
-        self.state.plant_valve_pump_tank_B201_list.append(self.state.valve_pump_tank_B201)
-        self.state.plant_valve_pump_tank_B202_list.append(self.state.valve_pump_tank_B202)
-        self.state.plant_valve_pump_tank_B203_list.append(self.state.valve_pump_tank_B203)
-        self.state.plant_valve_pump_tank_B204_list.append(self.state.valve_pump_tank_B204)
-        self.state.plant_B201_level_list.append(self.state.B201_level)
-        self.state.plant_B202_level_list.append(self.state.B202_level)
-        self.state.plant_B203_level_list.append(self.state.B203_level)
-        self.state.plant_B204_level_list.append(self.state.B204_level)
-        self.state.plant_pump_power_list.append(self.state.pump_power)
+        self.state.plant_valve_in0_list.append(self.state.plant_states['valve_in0'])
+        self.state.plant_valve_in1_list.append(self.state.plant_states['valve_in1'])
+        self.state.plant_valve_in2_list.append(self.state.plant_states['valve_in2'])
+        self.state.plant_valve_out_list.append(self.state.plant_states['valve_out'])
+        self.state.plant_valve_pump_tank_B201_list.append(self.state.plant_states['valve_pump_tank_B201'])
+        self.state.plant_valve_pump_tank_B202_list.append(self.state.plant_states['valve_pump_tank_B202'])
+        self.state.plant_valve_pump_tank_B203_list.append(self.state.plant_states['valve_pump_tank_B203'])
+        self.state.plant_valve_pump_tank_B204_list.append(self.state.plant_states['valve_pump_tank_B204'])
+        self.state.plant_B201_level_list.append(self.state.plant_states['B201_level'])
+        self.state.plant_B202_level_list.append(self.state.plant_states['B202_level'])
+        self.state.plant_B203_level_list.append(self.state.plant_states['B203_level'])
+        self.state.plant_B204_level_list.append(self.state.plant_states['B204_level'])
+        self.state.plant_pump_power_list.append(self.state.plant_states['pump_power'])
         self.state.total_input_tokens_list.append(self.state.total_input_tokens)
         self.state.total_output_tokens_list.append(self.state.total_output_tokens)
         self.state.total_tokens_list.append(self.state.total_tokens) 
         self.state.reprompt_counts.append(self.state.reprompt)
+        self.state.init_state_list.append(self.state.digital_twin_states['init_state'])
         self.state.reprompt = 0
         
         df = pd.DataFrame({
@@ -369,7 +384,7 @@ class RouterFlow(Flow[ExampleState]):
                         'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list})
         df.to_csv('digital_twin_op.csv', index=False)
 
-        if self.state.plant_states['B204_level']>=0.055:
+        if self.state.plant_states['B202_level']>0.022:
             self.state.terminate = True
         self.state.reprompt = 0
         if self.state.terminate:
@@ -393,6 +408,7 @@ class RouterFlow(Flow[ExampleState]):
                         'valve_pump_tank_B202': self.state.plant_valve_pump_tank_B202_list,
                         'valve_pump_tank_B203': self.state.plant_valve_pump_tank_B203_list,
                         'valve_pump_tank_B204': self.state.plant_valve_pump_tank_B204_list,
+                        "init_state": self.state.init_state_list,
                         })
         df.to_csv('plant_op.csv', index=False)
         df = pd.DataFrame({ 'reprompts': self.state.reprompt_counts,
@@ -432,6 +448,7 @@ if __name__ == "__main__":
         'pump_power': 0.2,
         'anom_clogging': 1,
         'anom_valve_in0': 0,
+        'init_state': 0,
     }
     flow.kickoff(inputs=plant_states)
     flow.plot()

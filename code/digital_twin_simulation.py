@@ -64,5 +64,6 @@ def digital_twin(plant_states):
     plant_states['B202_level'] = df['mixer0.tank_B202.level'].iloc[-1]
     plant_states['B203_level'] = df['mixer0.tank_B203.level'].iloc[-1]
     plant_states['B204_level'] = df['mixer0.tank_B204.level'].iloc[-1]
+    plant_states['init_state'] = init_state
 
     return plant_states

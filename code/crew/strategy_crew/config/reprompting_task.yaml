@@ -5,6 +5,29 @@ reprompt_strategy:
 
     The goal is to analyze what went wrong, and design a step-by-step correction plan.
 
+    **Plant Function:**
+      - Mixing of three liquids, sequentially transferred from tanks B201, B202, and B203 into tank B204.
+
+      **Plant Structure:**
+      - The system consists of four tanks: **B201, B202, B203, B204**.
+      - There are eight valves controlling liquid movement:
+        - **Filling Valves:** valve_in0, valve_in1, valve_in2
+        - **Pumping Valves:** valve_pump_tank_B201, valve_pump_tank_B202, valve_pump_tank_B203, valve_pump_tank_B204
+        - **Output Valve:** valve_out
+
+      **Plant Behavior:**
+      - Control Sequence:
+        1. Open **valve_in0** to fill **tank B201** to maximum of 0.033m only and only if the level in **tank B202** and **tank B203** both are at their minimum of 0.022m.
+        2. Once **B201** reaches its maximum capacity, close **valve_in0** and open **valve_in1** to fill **tank B202** to maximum of 0.033m.
+        3. Once **B202** reaches its maximum capacity, close **valve_in1** and open **valve_in2** to fill **tank B203** to maximum of 0.033m.
+        4. Once **B203** is full, all three tanks are ready for emptying.
+        5. Open **valve_pump_tank_B204** to fill **B204** and keep it open while emptying **B201, B202, and B203**.
+        6. Open **valve_pump_tank_B201** to transfer liquid from **B201 to B204**.
+        7. Once **B201** reaches min level between 0.021m and 0.22m, close **valve_pump_tank_B201** and open **valve_pump_tank_B202** to empty **B202** into **B204** till **B202** reaches min level between 0.021m and 0.22m.
+        8. Once **B202** reaches min level between 0.021m and 0.22m, close **valve_pump_tank_B202** and open **valve_pump_tank_B203** to empty **B203** into **B204** till **B203** reaches min level between 0.021m and 0.22m.
+        9. Once **B203** reaches min level between 0.021m and 0.22m, all liquids have been mixed in **B204**.
+        10. Open **valve_out** to empty the mixed liquid from **B204** till it reaches a min level between 0.021m and 0.22m.
+
     **Current State:**
       - The level of tank B201 is {B201_level}m 
       - The level of tank B202 is {B202_level}m 
@@ -23,8 +46,6 @@ reprompt_strategy:
     **System Specifications:**
       - Valves B201, B202, B203 and B204 are solenoid valves that is on or off only. 
       - The pump power can be adjusted between 0 and 1 (0 to 750W).
-      - The pump is speed-controlled via an input shaft speed N (rpm), with a nominal speed of 166.43 rpm. The agent can vary the input speed to increase or decrease flow.
-      - The pump follows a quadratic head vs. flow rate relationship. At higher speeds, the pump can deliver greater head and flow. The flow direction is fixed due to a built-in check valve (no flow reversal allowed). 
       
     - Validation agent has flagged an issue with the current operation. 
       - The issue flagged is {issue_flagged} (e.g., flow obstruction, incorrect valve status, or insufficient pump power).
