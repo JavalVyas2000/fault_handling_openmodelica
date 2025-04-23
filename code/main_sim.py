@@ -186,30 +186,25 @@ class RouterFlow(Flow[ExampleState]):
             )
         )
 
-        self.state.valve_in0 = output['valve_in0']
-        self.state.valve_in1 = output['valve_in1']
-        self.state.valve_in2 = output['valve_in2']
-        self.state.valve_out = output['valve_out']
-        self.state.valve_pump_tank_B201 = output['valve_pump_tank_B201']
-        self.state.valve_pump_tank_B202 = output['valve_pump_tank_B202']
-        self.state.valve_pump_tank_B203 = output['valve_pump_tank_B203']
-        self.state.valve_pump_tank_B204 = output['valve_pump_tank_B204']
-        self.state.pump_power = output['pump_power']
+        self.state.plant_states['valve_in0'] = output['valve_in0']
+        self.state.plant_states['valve_in1'] = output['valve_in1']
+        self.state.plant_states['valve_in2'] = output['valve_in2']
+        self.state.plant_states['valve_out'] = output['valve_out']
+        self.state.plant_states['valve_pump_tank_B201'] = output['valve_pump_tank_B201']
+        self.state.plant_states['valve_pump_tank_B202'] = output['valve_pump_tank_B202']
+        self.state.plant_states['valve_pump_tank_B203'] = output['valve_pump_tank_B203']
+        self.state.plant_states['valve_pump_tank_B204'] = output['valve_pump_tank_B204']
+        self.state.plant_states['pump_power'] = output['pump_power']
         self.state.message.append(output.raw)
 
-        self.state.valve_in0_list.append(self.state.valve_in0)
-        self.state.valve_in1_list.append(self.state.valve_in1)
-        self.state.valve_in2_list.append(self.state.valve_in2)
-        self.state.valve_out_list.append(self.state.valve_out)
-        self.state.valve_pump_tank_B201_list.append(self.state.valve_pump_tank_B201)
-        self.state.valve_pump_tank_B202_list.append(self.state.valve_pump_tank_B202)
-        self.state.valve_pump_tank_B203_list.append(self.state.valve_pump_tank_B203)
-        self.state.valve_pump_tank_B204_list.append(self.state.valve_pump_tank_B204)
-        self.state.B201_level_list.append(self.state.B201_level)
-        self.state.B202_level_list.append(self.state.B202_level)
-        self.state.B203_level_list.append(self.state.B203_level)
-        self.state.B204_level_list.append(self.state.B204_level)
-        self.state.pump_power_list.append(self.state.pump_power)
+        self.state.valve_in0_list.append(self.state.plant_states['valve_in0'])
+        self.state.valve_in1_list.append(self.state.plant_states['valve_in1'])
+        self.state.valve_in2_list.append(self.state.plant_states['valve_in2'])
+        self.state.valve_out_list.append(self.state.plant_states['valve_out'])
+        self.state.valve_pump_tank_B201_list.append(self.state.plant_states['valve_pump_tank_B201'])
+        self.state.valve_pump_tank_B202_list.append(self.state.plant_states['valve_pump_tank_B202'])
+        self.state.valve_pump_tank_B203_list.append(self.state.plant_states['valve_pump_tank_B203'])
+        self.state.valve_pump_tank_B204_list.append(self.state.plant_states['valve_pump_tank_B204'])
 
         self.state.total_input_tokens += output.token_usage.prompt_tokens
         self.state.total_output_tokens += output.token_usage.completion_tokens
@@ -217,25 +212,30 @@ class RouterFlow(Flow[ExampleState]):
 
     @listen(action_agent)
     def digital_twin_agent(self):
+        self.state.digital_twin_states = self.state.plant_states.copy()
         print('Digital Twin....')
         print('Digital Twin States Before:')
         print(self.state.digital_twin_states)
         print(f'anom_clogging: {self.state.anom_clogging}')
         print(f'anom_valve_in0: {self.state.anom_valve_in0}')
-        self.state.digital_twin_states = digital_twin(self.state.plant_states)
-        
-        # self.state.plant_states['init_state']=self.state.digital_twin_states['init_state']
+        self.state.digital_twin_states = digital_twin(self.state.digital_twin_states)
+
         print('Digital Twin States:')
         print(self.state.digital_twin_states)
         print(self.state.plant_states)
+        self.state.B201_level_list.append(self.state.digital_twin_states['B201_level'])
+        self.state.B202_level_list.append(self.state.digital_twin_states['B202_level'])
+        self.state.B203_level_list.append(self.state.digital_twin_states['B203_level'])
+        self.state.B204_level_list.append(self.state.digital_twin_states['B204_level'])
+        self.state.pump_power_list.append(self.state.digital_twin_states['pump_power'])
 
     @router(digital_twin_agent)
     def validation_agent(self):
         print('Validating....')
         if self.state.reprompt<self.state.max_itr:
             print('Validating....')
-            self.state.action_valid, self.state.action_required = action_validation(self.state.digital_twin_states)
-            self.state.power_valid, self.state.power_required = power_validation(self.state.digital_twin_states)
+            self.state.action_valid, self.state.action_required = action_validation(self.state.digital_twin_states,self.state.plant_states)
+            self.state.power_valid, self.state.power_required = power_validation(self.state.digital_twin_states,self.state.plant_states)
             print('Printing_validation....')
             print(self.state.action_valid, self.state.action_required)
             print(self.state.power_valid, self.state.power_required)
@@ -294,22 +294,22 @@ class RouterFlow(Flow[ExampleState]):
         print('Passing to plant....')
         print('plant States Before:')
         print(self.state.plant_states)
-        self.state.plant_states = {'B201_level': self.state.plant_states['B201_level'],
-                        'B202_level': self.state.plant_states['B201_level'],
-                        'B203_level': self.state.plant_states['B203_level'],
-                        'B204_level': self.state.plant_states['B204_level'],
-                        'valve_in0': self.state.plant_states['valve_in0'],
-                        'valve_in1': self.state.plant_states['valve_in1'],
-                        'valve_in2': self.state.plant_states['valve_in2'],
-                        'valve_out': self.state.plant_states['valve_out'],
-                        'valve_pump_tank_B201': self.state.plant_states['valve_pump_tank_B201'],
-                        'valve_pump_tank_B202': self.state.plant_states['valve_pump_tank_B202'],
-                        'valve_pump_tank_B203': self.state.plant_states['valve_pump_tank_B203'],
-                        'valve_pump_tank_B204': self.state.plant_states['valve_pump_tank_B204'],
-                        'pump_power': self.state.plant_states['pump_power'],
-                        'anom_clogging': self.state.anom_clogging,
-                        'anom_valve_in0': self.state.anom_valve_in0,
-                        'init_state': self.state.init_state}
+        # self.state.plant_states = {'B201_level': self.state.plant_states['B201_level'],
+        #                 'B202_level': self.state.plant_states['B201_level'],
+        #                 'B203_level': self.state.plant_states['B203_level'],
+        #                 'B204_level': self.state.plant_states['B204_level'],
+        #                 'valve_in0': self.state.plant_states['valve_in0'],
+        #                 'valve_in1': self.state.plant_states['valve_in1'],
+        #                 'valve_in2': self.state.plant_states['valve_in2'],
+        #                 'valve_out': self.state.plant_states['valve_out'],
+        #                 'valve_pump_tank_B201': self.state.plant_states['valve_pump_tank_B201'],
+        #                 'valve_pump_tank_B202': self.state.plant_states['valve_pump_tank_B202'],
+        #                 'valve_pump_tank_B203': self.state.plant_states['valve_pump_tank_B203'],
+        #                 'valve_pump_tank_B204': self.state.plant_states['valve_pump_tank_B204'],
+        #                 'pump_power': self.state.plant_states['pump_power'],
+        #                 'anom_clogging': self.state.anom_clogging,
+        #                 'anom_valve_in0': self.state.anom_valve_in0,
+        #                 'init_state': self.state.init_state}
 
         self.state.plant_states = plant(self.state.plant_states)
         print('plant States:')
@@ -346,7 +346,7 @@ class RouterFlow(Flow[ExampleState]):
         self.state.total_output_tokens_list.append(self.state.total_output_tokens)
         self.state.total_tokens_list.append(self.state.total_tokens) 
         self.state.reprompt_counts.append(self.state.reprompt)
-        self.state.init_state_list.append(self.state.digital_twin_states['init_state'])
+        self.state.init_state_list.append(self.state.plant_states['init_state'])
         self.state.reprompt = 0
         
         df = pd.DataFrame({
@@ -384,7 +384,7 @@ class RouterFlow(Flow[ExampleState]):
                         'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list})
         df.to_csv('digital_twin_op.csv', index=False)
 
-        if self.state.plant_states['B202_level']>0.022:
+        if self.state.plant_states['B204_level']>0.055:
             self.state.terminate = True
         self.state.reprompt = 0
         if self.state.terminate:
@@ -395,41 +395,41 @@ class RouterFlow(Flow[ExampleState]):
     @listen("terminate")
     def terminate_agent(self):
         print('Terminating....')
-        df = pd.DataFrame({
-                        'B201_level': self.state.plant_B201_level_list,
-                        'B202_level': self.state.plant_B202_level_list,
-                        'B203_level': self.state.plant_B203_level_list,
-                        'B204_level': self.state.plant_B204_level_list,
-                        'valve_in0': self.state.plant_valve_in0_list,
-                        'valve_in1': self.state.plant_valve_in1_list,
-                        'valve_in2': self.state.plant_valve_in2_list,
-                        'valve_out': self.state.plant_valve_out_list,
-                        'valve_pump_tank_B201': self.state.plant_valve_pump_tank_B201_list,
-                        'valve_pump_tank_B202': self.state.plant_valve_pump_tank_B202_list,
-                        'valve_pump_tank_B203': self.state.plant_valve_pump_tank_B203_list,
-                        'valve_pump_tank_B204': self.state.plant_valve_pump_tank_B204_list,
-                        "init_state": self.state.init_state_list,
-                        })
-        df.to_csv('plant_op.csv', index=False)
-        df = pd.DataFrame({ 'reprompts': self.state.reprompt_counts,
-                        'total_input_tokens': self.state.total_input_tokens_list,
-                        'total_output_tokens': self.state.total_output_tokens_list,
-                        'total_tokens': self.state.total_tokens_list})
-        df.to_csv('llm_plant_op.csv', index=False)
-        df = pd.DataFrame({
-                        'B201_level': self.state.B201_level_list,
-                        'B202_level': self.state.B202_level_list,
-                        'B203_level': self.state.B203_level_list,
-                        'B204_level': self.state.B204_level_list,
-                        'valve_in0': self.state.valve_in0_list,
-                        'valve_in1': self.state.valve_in1_list,
-                        'valve_in2': self.state.valve_in2_list,
-                        'valve_out': self.state.valve_out_list,
-                        'valve_pump_tank_B201': self.state.valve_pump_tank_B201_list,
-                        'valve_pump_tank_B202': self.state.valve_pump_tank_B202_list,
-                        'valve_pump_tank_B203': self.state.valve_pump_tank_B203_list,
-                        'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list})
-        df.to_csv('digital_twin_op.csv', index=False)
+        # df = pd.DataFrame({
+        #                 'B201_level': self.state.plant_B201_level_list,
+        #                 'B202_level': self.state.plant_B202_level_list,
+        #                 'B203_level': self.state.plant_B203_level_list,
+        #                 'B204_level': self.state.plant_B204_level_list,
+        #                 'valve_in0': self.state.plant_valve_in0_list,
+        #                 'valve_in1': self.state.plant_valve_in1_list,
+        #                 'valve_in2': self.state.plant_valve_in2_list,
+        #                 'valve_out': self.state.plant_valve_out_list,
+        #                 'valve_pump_tank_B201': self.state.plant_valve_pump_tank_B201_list,
+        #                 'valve_pump_tank_B202': self.state.plant_valve_pump_tank_B202_list,
+        #                 'valve_pump_tank_B203': self.state.plant_valve_pump_tank_B203_list,
+        #                 'valve_pump_tank_B204': self.state.plant_valve_pump_tank_B204_list,
+        #                 "init_state": self.state.init_state_list,
+        #                 })
+        # df.to_csv('plant_op.csv', index=False)
+        # df = pd.DataFrame({ 'reprompts': self.state.reprompt_counts,
+        #                 'total_input_tokens': self.state.total_input_tokens_list,
+        #                 'total_output_tokens': self.state.total_output_tokens_list,
+        #                 'total_tokens': self.state.total_tokens_list})
+        # df.to_csv('llm_plant_op.csv', index=False)
+        # df = pd.DataFrame({
+        #                 'B201_level': self.state.B201_level_list,
+        #                 'B202_level': self.state.B202_level_list,
+        #                 'B203_level': self.state.B203_level_list,
+        #                 'B204_level': self.state.B204_level_list,
+        #                 'valve_in0': self.state.valve_in0_list,
+        #                 'valve_in1': self.state.valve_in1_list,
+        #                 'valve_in2': self.state.valve_in2_list,
+        #                 'valve_out': self.state.valve_out_list,
+        #                 'valve_pump_tank_B201': self.state.valve_pump_tank_B201_list,
+        #                 'valve_pump_tank_B202': self.state.valve_pump_tank_B202_list,
+        #                 'valve_pump_tank_B203': self.state.valve_pump_tank_B203_list,
+        #                 'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list})
+        # df.to_csv('digital_twin_op.csv', index=False)
 if __name__ == "__main__":
     flow = RouterFlow()
     plant_states= {

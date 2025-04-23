@@ -39,7 +39,7 @@ plant_operation:
       - The valve_pump_tank_B204 is {valve_pump_tank_B204} 
       - The valve_out is {valve_out}
 
-      Strictly follow the steps in that order. Do not skip a step. 
+      Strictly follow the operational procedure in the mentioned order. Do not skip a step. 
       If there are no actions required from the agent as the levels have not hit the max or min, do not do anything and return the same state the valves are in. 
 
       **Expected Action:**
@@ -49,7 +49,7 @@ plant_operation:
 
       **Suggested Action for Agent:**
       {reprompting_suggestions}
-      Fault detected by monitoring agent is {fault_detected}
+
       **Example Action:**
       - If **B201** is empty, the agent should return: `valve_pump_tank_B201 - close`.
 

@@ -27,6 +27,7 @@ def plant(plant_states):
     elif B204_level<0.056: ### State emptying tank B204
         init_state = 6
 
+    plant_states['init_state'] = init_state
     setup['ds1']['model']['modules']['mixer0']['init_states']['B201_level']=plant_states['B201_level']
     setup['ds1']['model']['modules']['mixer0']['init_states']['B202_level']=plant_states['B202_level']
     setup['ds1']['model']['modules']['mixer0']['init_states']['B203_level']=plant_states['B203_level']
@@ -39,7 +40,7 @@ def plant(plant_states):
     setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B202_input']=plant_states['valve_pump_tank_B202']
     setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B203_input']=plant_states['valve_pump_tank_B203']
     setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B204_input']=plant_states['valve_pump_tank_B204']
-    setup['ds1']['model']['modules']['mixer0']['init_states']['init_state']=init_state
+    setup['ds1']['model']['modules']['mixer0']['init_states']['init_state']=plant_states['init_state']
     setup['ds1']['model']['modules']['mixer0']['init_states']['pump_power']=plant_states['pump_power']
     if plant_states['anom_clogging'] == 1:
         setup['ds1']['model']['modules']['mixer0']['faults']['anom_clogging']=True

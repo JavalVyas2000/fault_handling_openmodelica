@@ -1,2 +1,5 @@
 reprompts,total_input_tokens,total_output_tokens,total_tokens
-0,1285,210,1495
+0,1279,233,1512
+0,2579,478,3057
+1,6905,1142,8047
+1,11498,1970,13468
