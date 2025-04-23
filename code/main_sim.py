@@ -219,7 +219,7 @@ class RouterFlow(Flow[ExampleState]):
         print(f'anom_clogging: {self.state.anom_clogging}')
         print(f'anom_valve_in0: {self.state.anom_valve_in0}')
         self.state.digital_twin_states = digital_twin(self.state.digital_twin_states)
-
+        self.state.init_state_list.append(self.state.digital_twin_states['init_state'])
         print('Digital Twin States:')
         print(self.state.digital_twin_states)
         print(self.state.plant_states)
@@ -234,8 +234,8 @@ class RouterFlow(Flow[ExampleState]):
         print('Validating....')
         if self.state.reprompt<self.state.max_itr:
             print('Validating....')
-            self.state.action_valid, self.state.action_required = action_validation(self.state.digital_twin_states,self.state.plant_states)
-            self.state.power_valid, self.state.power_required = power_validation(self.state.digital_twin_states,self.state.plant_states)
+            self.state.action_valid, self.state.action_required = action_validation(self.state.digital_twin_states)
+            self.state.power_valid, self.state.power_required = power_validation(self.state.digital_twin_states)
             print('Printing_validation....')
             print(self.state.action_valid, self.state.action_required)
             print(self.state.power_valid, self.state.power_required)
@@ -346,7 +346,7 @@ class RouterFlow(Flow[ExampleState]):
         self.state.total_output_tokens_list.append(self.state.total_output_tokens)
         self.state.total_tokens_list.append(self.state.total_tokens) 
         self.state.reprompt_counts.append(self.state.reprompt)
-        self.state.init_state_list.append(self.state.plant_states['init_state'])
+        # self.state.plant_init_state_list.append(self.state.plant_states['init_state'])
         self.state.reprompt = 0
         
         df = pd.DataFrame({
@@ -381,7 +381,8 @@ class RouterFlow(Flow[ExampleState]):
                         'valve_pump_tank_B201': self.state.valve_pump_tank_B201_list,
                         'valve_pump_tank_B202': self.state.valve_pump_tank_B202_list,
                         'valve_pump_tank_B203': self.state.valve_pump_tank_B203_list,
-                        'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list})
+                        'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list,
+                        "init_state": self.state.init_state_list,})
         df.to_csv('digital_twin_op.csv', index=False)
 
         if self.state.plant_states['B204_level']>0.055:
