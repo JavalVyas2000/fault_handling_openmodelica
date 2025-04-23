@@ -20,9 +20,9 @@ def digital_twin(plant_states):
         init_state = 2
     elif B204_level>0.021 and B204_level<0.032: ### State emptying tank B201
         init_state = 3
-    elif B204_level>0.032 and B204_level<0.045: ### State emptying tank B202
+    elif B204_level>0.032 and B204_level<0.044: ### State emptying tank B202
         init_state = 4
-    elif B204_level>0.043 and B204_level<0.056: ### State emptying tank B203
+    elif B204_level>0.044 and B204_level<0.055: ### State emptying tank B203
         init_state = 5
     elif B204_level<0.056: ### State emptying tank B204
         init_state = 6

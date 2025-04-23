@@ -362,6 +362,7 @@ class RouterFlow(Flow[ExampleState]):
                         'valve_pump_tank_B202': self.state.plant_valve_pump_tank_B202_list,
                         'valve_pump_tank_B203': self.state.plant_valve_pump_tank_B203_list,
                         'valve_pump_tank_B204': self.state.plant_valve_pump_tank_B204_list,
+                        'pump_power': self.state.plant_pump_power_list,
                         })
         df.to_csv('plant_op.csv', index=False)
         df = pd.DataFrame({ 'reprompts': self.state.reprompt_counts,
@@ -382,7 +383,8 @@ class RouterFlow(Flow[ExampleState]):
                         'valve_pump_tank_B202': self.state.valve_pump_tank_B202_list,
                         'valve_pump_tank_B203': self.state.valve_pump_tank_B203_list,
                         'valve_pump_tank_B204': self.state.valve_pump_tank_B204_list,
-                        "init_state": self.state.init_state_list,})
+                        "init_state": self.state.init_state_list,
+                        'pump_power': self.state.pump_power_list,})
         df.to_csv('digital_twin_op.csv', index=False)
 
         if self.state.plant_states['B204_level']>0.055:
@@ -435,21 +437,21 @@ if __name__ == "__main__":
     flow = RouterFlow()
     plant_states= {
         'B201_level': 0.022,
-        'B202_level': 0.022,
-        'B203_level': 0.022,
-        'B204_level': 0.022,
-        'valve_in0': 1,
+        'B202_level': 0.033,
+        'B203_level': 0.033,
+        'B204_level': 0.044,
+        'valve_in0': 0,
         'valve_in1': 0,
         'valve_in2': 0,
         'valve_out': 0,
         'valve_pump_tank_B201': 0,
-        'valve_pump_tank_B202': 0,
+        'valve_pump_tank_B202': 1,
         'valve_pump_tank_B203': 0,
-        'valve_pump_tank_B204': 0,
+        'valve_pump_tank_B204': 1,
         'pump_power': 0.2,
         'anom_clogging': 1,
         'anom_valve_in0': 0,
-        'init_state': 0,
+        'init_state': 4,
     }
     flow.kickoff(inputs=plant_states)
     flow.plot()
