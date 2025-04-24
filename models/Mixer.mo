@@ -10,21 +10,21 @@ model mixerModule
   parameter Real pump_P101_head_min = 1.022;
   // configurable parameters
   parameter Real B201_level = 0.0219999998977998;
-  parameter Real B202_level = 0.0219999998977998;
+  parameter Real B202_level = 0.0219999998977997;
   parameter Real B203_level = 0.0330000001033;
-  parameter Real B204_level = 0.0441395622495697;
+  parameter Real B204_level = 0.0442567375081346;
   parameter Real valve_in0_input = 0.0;
-  parameter Real valve_in1_input = 1.0;
+  parameter Real valve_in1_input = 0.0;
   parameter Real valve_in2_input = 0.0;
   parameter Real valve_out_input = 0.0;
   parameter Real valve_pump_tank_B201_input = 0.0;
-  parameter Real valve_pump_tank_B202_input = 1.0;
+  parameter Real valve_pump_tank_B202_input = 0.0;
   parameter Real valve_pump_tank_B203_input = 1.0;
   parameter Real valve_pump_tank_B204_input = 1.0;
   Boolean force_full_tank_B201_transition;
   Boolean force_full_tank_B202_transition;
   Boolean force_full_tank_B203_transition;
-  parameter Real init_state = 4;
+  parameter Real init_state = 5;
   // anomalies
   parameter Boolean anom_leaking = false;
   parameter Boolean anom_clogging = false;
