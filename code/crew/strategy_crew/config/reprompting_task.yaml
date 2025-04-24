@@ -48,9 +48,10 @@ reprompt_strategy:
       - The pump power can be adjusted between 0 and 1 (0 to 750W).
       
     - Validation agent has flagged an issue with the current operation. 
-      - The issue flagged is {issue_flagged} (e.g., flow obstruction, incorrect valve status, or insufficient pump power).
-    - Fault detected by monitoring agent is {fault_detected} (e.g., clogging anomaly in the line connecting tanks B201, B202, and B203 to B204).
-
+      - The issue flagged is {issue_flagged}.
+      - Identify the valves/pump power casuing this issue and suggest corrective action.
+      - If more valves are open then required, suggest closing the extra valves and only keeping the required valves open.
+      - Do not change the pump power if not required.
     **Actuators:**
     - The agent can manipulate the following actuators:
       - **Valves:** valve_in0, valve_in1, valve_in2, valve_pump_tank_B201, valve_pump_tank_B202, valve_pump_tank_B203, valve_pump_tank_B204, valve_out
