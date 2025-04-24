@@ -9,104 +9,75 @@ model mixerModule
   parameter Real pump_P101_head_middle = 1.534;
   parameter Real pump_P101_head_min = 1.022;
   // configurable parameters
-  parameter Real B201_level = 0.0330000001033;
-  parameter Real B202_level = 0.0282823757582958;
-  parameter Real B203_level = 0.0219999998977993;
-  parameter Real B204_level = 0.0591397291784853;
-  parameter Boolean valve_in0_input = true;
-  parameter Boolean valve_in1_input = true;
-  parameter Boolean valve_in2_input = true;
-  parameter Boolean valve_out_input = true;
-  parameter Boolean valve_pump_tank_B201_input = true;
-  parameter Boolean valve_pump_tank_B202_input = true;
-  parameter Boolean valve_pump_tank_B203_input = true;
+  parameter Real B201_level = 0.0219999998977993;
+  parameter Real B202_level = 0.0219999998977999;
+  parameter Real B203_level = 0.0330000001033;
+  parameter Real B204_level = 0.044254359499781;
+  parameter Real valve_in0_input = 0.0;
+  parameter Real valve_in1_input = 0.0;
+  parameter Real valve_in2_input = 1.0;
+  parameter Real valve_out_input = 0.0;
+  parameter Real valve_pump_tank_B201_input = 0.0;
+  parameter Real valve_pump_tank_B202_input = 0.0;
+  parameter Real valve_pump_tank_B203_input = 0.0;
+  parameter Real valve_pump_tank_B204_input = 1.0;
+  Boolean force_full_tank_B201_transition;
+  Boolean force_full_tank_B202_transition;
+  Boolean force_full_tank_B203_transition;
+  parameter Real init_state = 5;
   // anomalies
   parameter Boolean anom_leaking = false;
-  parameter Boolean anom_clogging = false;
+  parameter Boolean anom_clogging = true;
   parameter Boolean anom_valve_in0 = false;
   parameter Boolean anom_valve_in1 = false;
   parameter Boolean anom_valve_in2 = false;
   parameter Boolean anom_valve_out = false;
   parameter Boolean anom_pump70 = false;
   parameter Boolean anom_pump90 = false;
-  parameter Real var_valve_in0 = if anom_valve_in0 then 0.2 else 0.0;
+  parameter Real var_valve_in0 = if anom_valve_in0 then 0.0 else 0.0;
   parameter Real var_valve_in1 = if anom_valve_in1 then 0.2 else 0.0;
   parameter Real var_valve_in2 = if anom_valve_in2 then 0.2 else 0.0;
   parameter Real var_valve_out = if anom_valve_out then 0.2 else 0.0;
-  parameter Real var_pump_n = if anom_pump70 then 0.7 else if anom_pump90 then 0.9 else 1.0;
+  parameter Real var_pump_n = if anom_pump70 then 0.7 else if anom_pump90 then 0.9 else 1;
   Real pump_n_in;
+  Real pump_power = 0.2;
   // ports
-  Modelica.Fluid.Interfaces.FluidPort_a port_in0(redeclare package Medium = Medium);
-mixture_model_prompt  Modelica.Fluid.Interfaces.FluidPort_a port_in1(redeclare package Medium = Medium);
-  Modelica.Fluid.Interfaces.FluidPort_a port_in2(redeclare package Medium = Medium);
-  Modelica.Fluid.Interfaces.FluidPort_b port_out0(redeclare package Medium = Medium);
-  Modelica.Fluid.Sources.FixedBoundary anom_sink(redeclare package Medium = Medium, nPorts = 1, p = 0.999e5);
+  Modelica.Fluid.Interfaces.FluidPort_a port_in0(redeclare package Medium = Medium)
+  Modelica.Fluid.Interfaces.FluidPort_a port_in1(redeclare package Medium = Medium)
+  Modelica.Fluid.Interfaces.FluidPort_a port_in2(redeclare package Medium = Medium)
+  Modelica.Fluid.Interfaces.FluidPort_b port_out0(redeclare package Medium = Medium)
+  Modelica.Fluid.Sources.FixedBoundary anom_sink(redeclare package Medium = Medium, nPorts = 1, p = 0.999e5)
   // tanks
-  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B201(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, height = 0.22, level_start = B201_level, nPorts = 1, nTopPorts = 1, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, p_ambient(displayUnit = "Pa") = 1e5);
-  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B202(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, height = 0.22, level_start = B202_level, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, nPorts = 1, nTopPorts = 1, p_ambient(displayUnit = "Pa") = 1e5, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false);
-  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B203(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, height = 0.22, level_start = B203_level, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, nPorts = 1, nTopPorts = 1, p_ambient(displayUnit = "Pa") = 1e5, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false);
-  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B204(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, height = 1.22, level_start = B204_level, nPorts = 1, nTopPorts = 1, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, p_ambient(displayUnit = "Pa") = 1e5);
+  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B201(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, height = 0.22, level_start = B201_level, nPorts = 1, nTopPorts = 1, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, p_ambient(displayUnit = "Pa") = 1e5) 
+  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B202(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, height = 0.22, level_start = B202_level, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, nPorts = 1, nTopPorts = 1, p_ambient(displayUnit = "Pa") = 1e5, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false) 
+  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B203(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, height = 0.22, level_start = B203_level, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, nPorts = 1, nTopPorts = 1, p_ambient(displayUnit = "Pa") = 1e5, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false) 
+  Modelica.Fluid.Examples.AST_BatchPlant.BaseClasses.TankWithTopPorts tank_B204(redeclare package Medium = Medium, V0 = 0.0001, crossArea = 0.01431355, height = 1.22, level_start = B204_level, nPorts = 1, nTopPorts = 1, portsData = {Modelica.Fluid.Vessels.BaseClasses.VesselPortsData(diameter = 0.011, height = 0.001, zeta_out = 0, zeta_in = 1)}, stiffCharacteristicForEmptyPort = false, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, p_ambient(displayUnit = "Pa") = 1e5) 
   // pipes
-  Modelica.Fluid.Pipes.StaticPipe pipe0(redeclare package Medium = Medium, length = 1, diameter(displayUnit = "mm") = 0.01);
-  Modelica.Fluid.Pipes.StaticPipe pipe1(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005);
-  Modelica.Fluid.Pipes.StaticPipe pipe2(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1);
-  Modelica.Fluid.Pipes.StaticPipe pipe4(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1);
-  Modelica.Fluid.Pipes.StaticPipe pipe5(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005);
-  Modelica.Fluid.Pipes.StaticPipe pipe6(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005);
-  Modelica.Fluid.Fittings.TeeJunctionVolume tee0(redeclare package Medium = Medium, V = 0.1);
-  Modelica.Fluid.Fittings.TeeJunctionVolume tee1(redeclare package Medium = Medium, V = 0.1);
+  Modelica.Fluid.Pipes.StaticPipe pipe0(redeclare package Medium = Medium, length = 1, diameter(displayUnit = "mm") = 0.01)
+  Modelica.Fluid.Pipes.StaticPipe pipe1(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005)
+  Modelica.Fluid.Pipes.StaticPipe pipe2(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1)
+  Modelica.Fluid.Pipes.StaticPipe pipe4(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1)
+  Modelica.Fluid.Pipes.StaticPipe pipe5(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005)
+  Modelica.Fluid.Pipes.StaticPipe pipe6(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005) 
+  Modelica.Fluid.Fittings.TeeJunctionVolume tee0(redeclare package Medium = Medium, V = 0.1) 
+  Modelica.Fluid.Fittings.TeeJunctionVolume tee1(redeclare package Medium = Medium, V = 0.1)
   // valves
-  Modelica.Fluid.Valves.ValveLinear valve_in0(redeclare package Medium = Medium, dp(start = 1), m_flow(start = 1e-5), dp_nominal = 1, m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear valve_in1(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear valve_in2(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear valve_out(redeclare package Medium = Medium, dp(start = 1e5), dp_nominal = 1, m_flow(start = 0.0001), m_flow_nominal = 1);
-  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B201(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B202(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B203(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B204(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear leaking_valve(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
-  Modelica.Fluid.Valves.ValveLinear clogging_valve(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3);
+  Modelica.Fluid.Valves.ValveLinear valve_in0(redeclare package Medium = Medium, dp(start = 1), m_flow(start = 1e-5), dp_nominal = 1, m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear valve_in1(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear valve_in2(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear valve_out(redeclare package Medium = Medium, dp(start = 1e5), dp_nominal = 1, m_flow(start = 0.0001), m_flow_nominal = 1)
+  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B201(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B202(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B203(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear valve_pump_tank_B204(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear leaking_valve(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
+  Modelica.Fluid.Valves.ValveLinear clogging_valve(redeclare package Medium = Medium, dp(start = 1), dp_nominal = 1, m_flow(start = 1e-5), m_flow_nominal = 1e-3)
   // machines
-  Modelica.Fluid.Machines.PrescribedPump pump_P101(redeclare package Medium = Medium, N_nominal = 166.43, m_flow_start = 0.000001, T_start = 300, V(displayUnit = "m3") = 0.00004398128, checkValve = true, checkValveHomotopy = Modelica.Fluid.Types.CheckValveHomotopyType.Closed, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, redeclare function flowCharacteristic = Modelica.Fluid.Machines.BaseClasses.PumpCharacteristics.quadraticFlow(V_flow_nominal = {pump_P101_V_flow_at_max_head, pump_P101_V_flow_at_middle_head, pump_P101_V_flow_at_min_head}, head_nominal = {pump_P101_head_max, pump_P101_head_middle, pump_P101_head_min}), massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, nParallel = 1, p_a_start = 100000, p_b_start = 100000, use_N_in = true, allowFlowReversal = false);
-  Modelica.Blocks.Continuous.FirstOrder firstOrder(T = 1);
-  Modelica.Blocks.Sources.RealExpression n_in(y = pump_n_in);
-  Modelica.Blocks.Noise.UniformNoise uniformNoise(samplePeriod = 1, y_max = 0.8, y_min = 1.2);
-  Modelica.Blocks.Math.Product product1;
-  // sensors
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B201_low(threshold = 0.1*tank_B201.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B201_medium(threshold = 0.5*tank_B201.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B201_high(threshold = 0.9*tank_B201.height);
-  Modelica.Blocks.Sources.RealExpression tank_B201_level(y = tank_B201.level);
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B201_low;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B201_medium;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B201_high;
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B202_low(threshold = 0.1*tank_B202.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B202_medium(threshold = 0.5*tank_B202.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B202_high(threshold = 0.9*tank_B202.height);
-  Modelica.Blocks.Sources.RealExpression tank_B202_level(y = tank_B202.level);
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B202_low;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B202_medium;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B202_high;
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B203_low(threshold = 0.1*tank_B203.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B203_medium(threshold = 0.5*tank_B203.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B203_high(threshold = 0.9*tank_B203.height);
-  Modelica.Blocks.Sources.RealExpression tank_B203_level(y = tank_B203.level);
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B203_low;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B203_medium;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B203_high;
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B204_low(threshold = 0.1*tank_B204.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B204_medium(threshold = 0.5*tank_B204.height);
-  Modelica.Blocks.Math.RealToBoolean level_to_boolean_tank_B204_high(threshold = 0.9*tank_B204.height);
-  Modelica.Blocks.Sources.RealExpression tank_B204_level(y = tank_B204.level);
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B204_low;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B204_medium;
-  Modelica.Blocks.Interaction.Show.BooleanValue sensor_discrete_tank_B204_high;
-  Modelica.Fluid.Sensors.Pressure sensor_continuous_pressure_tank_B201(replaceable package Medium = Medium);
-  Modelica.Fluid.Sensors.Pressure sensor_continuous_pressure_tank_B202(replaceable package Medium = Medium);
-  Modelica.Fluid.Sensors.Pressure sensor_continuous_pressure_tank_B203(replaceable package Medium = Medium);
-  Modelica.Fluid.Sensors.Pressure sensor_continuous_pressure_tank_B204(replaceable package Medium = Medium);
-  Modelica.Fluid.Sensors.Pressure pressure_pump_P101(replaceable package Medium = Medium);
-  Modelica.Fluid.Sensors.VolumeFlowRate sensor_continuous_volumeFlowRate(replaceable package Medium = Medium);
+  Modelica.Fluid.Machines.PrescribedPump pump_P101(redeclare package Medium = Medium, N_nominal = 166.43, m_flow_start = 0.000001, T_start = 300, V(displayUnit = "m3") = 0.00004398128, checkValve = true, checkValveHomotopy = Modelica.Fluid.Types.CheckValveHomotopyType.Closed, energyDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, redeclare function flowCharacteristic = Modelica.Fluid.Machines.BaseClasses.PumpCharacteristics.quadraticFlow(V_flow_nominal = {pump_P101_V_flow_at_max_head, pump_P101_V_flow_at_middle_head, pump_P101_V_flow_at_min_head}, head_nominal = {pump_P101_head_max, pump_P101_head_middle, pump_P101_head_min}), massDynamics = Modelica.Fluid.Types.Dynamics.FixedInitial, nParallel = 1, p_a_start = 100000, p_b_start = 100000, use_N_in = true, allowFlowReversal = false) 
+  Modelica.Blocks.Continuous.FirstOrder firstOrder(T = 1) 
+  Modelica.Blocks.Sources.RealExpression n_in(y = pump_n_in) 
+  Modelica.Blocks.Noise.UniformNoise uniformNoise(samplePeriod = 1, y_max = 0.8, y_min = 1.2)
+  Modelica.Blocks.Math.Product product1 
   // stategraph
   inner Modelica.StateGraph.StateGraphRoot stateGraphRoot;
   Modelica.StateGraph.Step state_filling_tank_B201(nIn = 2, nOut = 1);
@@ -127,27 +98,33 @@ mixture_model_prompt  Modelica.Fluid.Interfaces.FluidPort_a port_in1(redeclare p
   Modelica.StateGraph.TransitionWithSignal condition_is_empty_tank_B204(enableTimer = true, waitTime = 0);
   Modelica.Fluid.Pipes.StaticPipe pipe7(redeclare package Medium = Medium, diameter(displayUnit = "mm") = 0.01, length = 1, m_flow_start = 0.0005);
 equation
-  condition_is_full_tank_B201.condition = tank_B201.level >= tank_B201.height*tankMaxVol;
-  condition_is_full_tank_B202.condition = tank_B202.level >= tank_B202.height*tankMaxVol;
-  condition_is_full_tank_B203.condition = tank_B203.level >= tank_B203.height*tankMaxVol;
+  force_full_tank_B201_transition = init_state<>0 and init_state<>1 and init_state<>2;
+  force_full_tank_B202_transition = init_state<>0 and init_state<>1 and init_state<>2;
+  force_full_tank_B203_transition = init_state<>0 and init_state<>1 and init_state<>2;
+  condition_is_full_tank_B201.condition = 
+  (tank_B201.level >= tank_B201.height*tankMaxVol) or force_full_tank_B201_transition;
+  condition_is_full_tank_B202.condition = 
+  (tank_B202.level >= tank_B202.height*tankMaxVol) or force_full_tank_B202_transition;
+  condition_is_full_tank_B203.condition = 
+  (tank_B203.level >= tank_B203.height*tankMaxVol) or force_full_tank_B203_transition;
   condition_is_empty_tank_B201.condition = tank_B201.level <= tank_B201.height*tankMinVol;
   condition_is_empty_tank_B202.condition = tank_B202.level <= tank_B202.height*tankMinVol;
   condition_is_empty_tank_B203.condition = tank_B203.level <= tank_B203.height*tankMinVol;
   condition_is_empty_tank_B204.condition = tank_B204.level <= tank_B204.height*tankMinVol;
-  valve_in0.opening = if state_filling_tank_B201.active and valve_in0_input then 1.0 else var_valve_in0;
-  valve_in1.opening = if state_filling_tank_B202.active and valve_in1_input then 1.0 else var_valve_in1;
-  valve_in2.opening = if state_filling_tank_B203.active and valve_in2_input then 1.0 else var_valve_in2;
-  valve_pump_tank_B201.opening = if state_emptying_tank_B201.active and valve_pump_tank_B201_input then 1.0 else 0.0;
-  valve_pump_tank_B202.opening = if state_emptying_tank_B202.active and valve_pump_tank_B202_input then 1.0 else 0.0;
-  valve_pump_tank_B203.opening = if state_emptying_tank_B203.active and valve_pump_tank_B203_input then 1.0 else 0.0;
-  valve_pump_tank_B204.opening = if state_emptying_tank_B201.active then 1.0 elseif state_emptying_tank_B202.active then 1.0
-   elseif state_emptying_tank_B203.active then 1.0 else 0.0;
-  pump_n_in = if state_emptying_tank_B201.active then 150.0*var_pump_n elseif state_emptying_tank_B202.active then 150.0*var_pump_n
-   elseif state_emptying_tank_B203.active then 150.0*var_pump_n else 0.0;
-  valve_out.opening = if state_emptying_tank_B204.active then 1.0 else 0.0;
+  valve_in0.opening = if state_filling_tank_B201.active and valve_in0_input > 0.5 then 1.0 else var_valve_in0;
+  valve_in1.opening = if state_filling_tank_B202.active and valve_in1_input > 0.5 then 1.0 else var_valve_in1;
+  valve_in2.opening = if state_filling_tank_B203.active and valve_in2_input > 0.5 then 1.0 else var_valve_in2;
+  valve_pump_tank_B201.opening = if state_emptying_tank_B201.active and valve_pump_tank_B201_input > 0.5 then 1.0 else 0.0;
+  valve_pump_tank_B202.opening = if state_emptying_tank_B202.active and valve_pump_tank_B202_input > 0.5 then 1.0 else 0.0;
+  valve_pump_tank_B203.opening = if state_emptying_tank_B203.active and valve_pump_tank_B203_input > 0.5 then 1.0 else 0.0;
+  valve_pump_tank_B204.opening = if state_emptying_tank_B201.active and valve_pump_tank_B204_input > 0.5 then 1.0 elseif state_emptying_tank_B202.active and valve_pump_tank_B204_input > 0.5 then 1.0
+   elseif state_emptying_tank_B203.active and valve_pump_tank_B204_input > 0.5 then 1.0 else 0.0;
+  pump_n_in = if state_emptying_tank_B201.active and valve_pump_tank_B201_input > 0.5 then 750.0*pump_power elseif state_emptying_tank_B202.active and valve_pump_tank_B202_input > 0.5 then 750.0*pump_power
+   elseif state_emptying_tank_B203.active and valve_pump_tank_B203_input > 0.5 then 750.0*pump_power else 0.0;
+  valve_out.opening = if state_emptying_tank_B204.active and valve_out_input > 0.5 then 1.0 else 0.0;
 // anomalies
   leaking_valve.opening = if anom_leaking then 0.8 else 0.0;
-  clogging_valve.opening = if anom_clogging then 0.2 else 1.0;
+  clogging_valve.opening = if anom_clogging then 0.5 else 1.0;
 // connections
   connect(tank_B201.ports[1], pipe0.port_a);
   connect(valve_in0.port_a, port_in0);

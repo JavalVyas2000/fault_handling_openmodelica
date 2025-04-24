@@ -185,7 +185,7 @@ class RouterFlow(Flow[ExampleState]):
                 }
             )
         )
-
+        self.state.reprompting_suggestions = ''
         self.state.plant_states['valve_in0'] = output['valve_in0']
         self.state.plant_states['valve_in1'] = output['valve_in1']
         self.state.plant_states['valve_in2'] = output['valve_in2']

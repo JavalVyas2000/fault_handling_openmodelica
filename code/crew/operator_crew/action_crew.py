@@ -28,10 +28,12 @@ class PlantState(BaseModel):
 class PlantOperatorCrew:
     """Plant Operator Crew"""
 
-    agents_config = "config/agents_words.yaml"
-    tasks_config = "config/tasks_words.yaml"
+    # agents_config = "config/agents_words.yaml"
+    # tasks_config = "config/tasks_words.yaml"
+    agents_config = "config/agents_modelica_code.yaml"
+    tasks_config = "config/tasks_modelica_code.yaml"
 
-    llm = ChatOpenAI(model="gpt-4o",temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=0)
     @agent
     def plant_operator(self) -> Agent:
         return Agent(

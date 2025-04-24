@@ -20,10 +20,10 @@ class PlantState(BaseModel):
 class PlantStrategyCrew:
     """Plant Operator Crew"""
 
-    agents_config = "config/strategy_agent.yaml"
-    tasks_config = "config/reprompting_task.yaml"
+    agents_config = "config/strategy_agent_modelica_code.yaml"
+    tasks_config = "config/reprompting_task_modelica_code.yaml"
 
-    llm = ChatOpenAI(model="gpt-4o",temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini",temperature=0)
     @agent
     def reprompt_agent(self) -> Agent:
         return Agent(
