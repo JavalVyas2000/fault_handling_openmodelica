@@ -19,12 +19,17 @@ class PlantState(BaseModel):
 @CrewBase
 class PlantStrategyCrew:
     """Plant Operator Crew"""
-
-    agents_config = "config/strategy_agent_modelica_code.yaml"
-    tasks_config = "config/reprompting_task_modelica_code.yaml"
-
+    ### Words only
     # agents_config = "config/strategy_agent.yaml"
     # tasks_config = "config/reprompting_task.yaml"
+
+    ### Modelica code
+    # agents_config = "config/strategy_agent_modelica_code.yaml"
+    # tasks_config = "config/reprompting_task_modelica_code.yaml"
+
+    ### P&ID
+    agents_config = "config/strategy_agent_pnid.yaml"
+    tasks_config = "config/reprompting_task_pnid.yaml"
 
     llm = ChatOpenAI(model="gpt-4o",temperature=0)
     @agent

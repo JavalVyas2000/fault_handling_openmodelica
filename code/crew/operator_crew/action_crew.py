@@ -27,11 +27,17 @@ class PlantState(BaseModel):
 @CrewBase
 class PlantOperatorCrew:
     """Plant Operator Crew"""
-
+    ### Words only
     # agents_config = "config/agents_words.yaml"
     # tasks_config = "config/tasks_words.yaml"
-    agents_config = "config/agents_modelica_code.yaml"
-    tasks_config = "config/tasks_modelica_code.yaml"
+
+    ### Modelica code
+    # agents_config = "config/agents_modelica_code.yaml"
+    # tasks_config = "config/tasks_modelica_code.yaml"
+
+    ### P&ID
+    agents_config = "config/agents_pnid.yaml"
+    tasks_config = "config/tasks_pnid.yaml"
 
     llm = ChatOpenAI(model="gpt-4o",temperature=0)
     @agent
