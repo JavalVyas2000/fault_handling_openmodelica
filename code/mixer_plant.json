@@ -29,7 +29,7 @@
                         "valve_pump_tank_B203_input": 1.0,
                         "valve_pump_tank_B204_input": 1.0,
                         "init_state": 5,
-                        "pump_power": 1.0,
+                        "pump_power": 0.5,
                         "anom_clogging": "true",
                         "anom_valve_in0": "false"
                     }

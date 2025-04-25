@@ -93,6 +93,7 @@ class ExampleState(BaseModel):
     reprompt:int = 0
     fault_detected:str = ''
     iterations:int = 0
+    plant_structure:dict = {}
     # df_history:pd.DataFrame = pd.DataFrame()
 
 
@@ -139,6 +140,37 @@ class RouterFlow(Flow[ExampleState]):
             'anom_valve_in0': 0,
             'init_state': 0,
         }
+        self.state.plant_structure= {
+            "nodes": [
+                {"id": "B201", "type": "tank"},
+                {"id": "B202", "type": "tank"},
+                {"id": "B203", "type": "tank"},
+                {"id": "B204", "type": "tank"},
+                {"id": "valve_in0", "type": "valve"},
+                {"id": "valve_in1", "type": "valve"},
+                {"id": "valve_in2", "type": "valve"},
+                {"id": "valve_pump_tank_B201", "type": "valve"},
+                {"id": "valve_pump_tank_B202", "type": "valve"},
+                {"id": "valve_pump_tank_B203", "type": "valve"},
+                {"id": "valve_pump_tank_B204", "type": "valve"},
+                {"id": "valve_out", "type": "valve"},
+                {"id": "pump_in", "type": "pump"}
+            ],
+            "edges": [
+                {"from": "valve_in0", "to": "B201"},
+                {"from": "valve_in1", "to": "B202"},
+                {"from": "valve_in2", "to": "B203"},
+                {"from": "B201", "to": "valve_pump_tank_B201"},
+                {"from": "valve_pump_tank_B201", "to": "pump_in"},
+                {"from": "B202", "to": "valve_pump_tank_B202"},
+                {"from": "valve_pump_tank_B202", "to": "pump_in"},
+                {"from": "B203", "to": "valve_pump_tank_B203"},
+                {"from": "valve_pump_tank_B203", "to": "pump_in"},
+                {"from": "pump_in", "to": "valve_pump_tank_B204"},
+                {"from": "valve_pump_tank_B204", "to": "B204"},
+                {"from": "B204", "to": "valve_out"}
+            ]
+        }
     @listen(or_(initialize, "next_itr"))
     def monitoring_agent(self):
         print('Monitoring....')
@@ -182,6 +214,7 @@ class RouterFlow(Flow[ExampleState]):
                     "pump_power":self.state.plant_states['pump_power'],
                     "fault_detected":self.state.fault_detected,
                     "reprompting_suggestions":self.state.reprompting_suggestions,
+                    "plant_structure":self.state.plant_structure,
                 }
             )
         )
@@ -277,6 +310,7 @@ class RouterFlow(Flow[ExampleState]):
                     "pump_power":self.state.plant_states['pump_power'],
                     "issue_flagged":self.state.issue_flagged,
                     "fault_detected":self.state.fault_detected,
+                    "plant_structure":self.state.plant_structure,
                 }
             )
         )
