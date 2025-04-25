@@ -9,10 +9,10 @@ model mixerModule
   parameter Real pump_P101_head_middle = 1.534;
   parameter Real pump_P101_head_min = 1.022;
   // configurable parameters
-  parameter Real B201_level = 0.0219999998977993;
-  parameter Real B202_level = 0.0219999998977999;
+  parameter Real B201_level = 0.0219999998977998;
+  parameter Real B202_level = 0.0219999998977997;
   parameter Real B203_level = 0.0330000001033;
-  parameter Real B204_level = 0.044254359499781;
+  parameter Real B204_level = 0.0442567375081346;
   parameter Real valve_in0_input = 0.0;
   parameter Real valve_in1_input = 0.0;
   parameter Real valve_in2_input = 0.0;

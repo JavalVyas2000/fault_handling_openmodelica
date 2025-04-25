@@ -31,7 +31,7 @@ class PlantStrategyCrew:
     agents_config = "config/strategy_agent_pnid.yaml"
     tasks_config = "config/reprompting_task_pnid.yaml"
 
-    llm = ChatOpenAI(model="gpt-4o-mini",temperature=0)
+    llm = ChatOpenAI(model="gpt-4o",temperature=0)
     @agent
     def reprompt_agent(self) -> Agent:
         return Agent(
