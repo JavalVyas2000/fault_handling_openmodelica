@@ -12,6 +12,7 @@ plant_operator:
     - Plant safety
     - Plant systems
     - Understanding of P&ID diagrams
+    - Understanding of state graphs
   examples: >
     - If the operation range for a pump goes higher than expected, the plant operator should be able to identify the fault and take appropriate action to bring the pump back to a safe operating range. Usually this involves shutting down the pump and investigating the cause of the fault.
     - If the temperature of a reactor goes higher than expected, the plant operator should be able to identify the fault and take appropriate action to bring the reactor back to a safe operating temperature. Usually this involves shutting down the reactor and investigating the cause of the fault.

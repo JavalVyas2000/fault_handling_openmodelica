@@ -8,23 +8,26 @@ reprompt_strategy:
     **Plant Function:**
       - Mixing of three liquids, sequentially transferred from tanks B201, B202, and B203 into tank B204.
 
-      **Plant Structure:**
-      - The system P&ID diagram is as follows:
-        plant structure: {plant_structure}
-        
+    **Plant Structure:**
+      - The system P&ID diagram is as follows (structured as a node-edge format or textual description):
+        {plant_structure}
 
-      **Plant Behavior:**
-      - Control Sequence:
-        1. Open **valve_in0** to fill **tank B201** to maximum of 0.033m only and only if the level in **tank B202** and **tank B203** both are at their minimum of 0.022m.
-        2. Once **B201** reaches its maximum capacity, close **valve_in0** and open **valve_in1** to fill **tank B202** to maximum of 0.033m.
-        3. Once **B202** reaches its maximum capacity, close **valve_in1** and open **valve_in2** to fill **tank B203** to maximum of 0.033m.
-        4. Once **B203** is full, all three tanks are ready for emptying.
-        5. Open **valve_pump_tank_B204** to fill **B204** and keep it open while emptying **B201, B202, and B203**.
-        6. Open **valve_pump_tank_B201** to transfer liquid from **B201 to B204**.
-        7. Once **B201** reaches min level between 0.021m and 0.22m, close **valve_pump_tank_B201** and open **valve_pump_tank_B202** to empty **B202** into **B204** till **B202** reaches min level between 0.021m and 0.22m.
-        8. Once **B202** reaches min level between 0.021m and 0.22m, close **valve_pump_tank_B202** and open **valve_pump_tank_B203** to empty **B203** into **B204** till **B203** reaches min level between 0.021m and 0.22m.
-        9. Once **B203** reaches min level between 0.021m and 0.22m, all liquids have been mixed in **B204**.
-        10. Open **valve_out** to empty the mixed liquid from **B204** till it reaches a min level between 0.021m and 0.22m.
+      **State Graph:**
+      - The State Graph represents the sequence of operations in the plant. It is a directed graph where each node represents a state and each edge represents a transition condition between states.
+      - The transitions happen only when the conditions are met. 
+      - The state graph is as follows:
+        fill_tank_B201 --> fill_tank_B202 --> fill_tank_B203 --> drain_tank_B201 --> drain_tank_B202 --> drain_tank_B203 --> end
+        Below are the transitions and conditions:
+        - fill_tank_B201 → fill_tank_B202  if B201 > 0.032m
+        - fill_tank_B202 → fill_tank_B203  if B202 > 0.032m
+        - fill_tank_B203 → drain_tank_B201 if B203 > 0.032m
+        - drain_tank_B201 → drain_tank_B202 if B201 < 0.022m
+        - drain_tank_B202 → drain_tank_B203 if B202 < 0.022m
+        - drain_tank_B203 → end if B203 < 0.022m
+
+      - Analyse the state graph and identify the current state of the system.
+      - Based on the current state, identify the next state and the conditions required to transition to that state.
+      - Take appropriate action to transition to the next state only when the conditions are met.
 
     **Current State:**
       - The level of tank B201 is {B201_level}m 
@@ -47,7 +50,9 @@ reprompt_strategy:
       
     - Validation agent has flagged an issue with the current operation. 
       - The issue flagged is {issue_flagged}.
+      - Look at the issue and analyze the current state of the system.
       - Identify the valves/pump power casuing this issue and suggest corrective action.
+      - Check all the actuators for their current state and suggest corrective action.
       - If more valves are open then required, suggest closing the extra valves and only keeping the required valves open.
       - Do not change the pump power if not required.
     **Actuators:**

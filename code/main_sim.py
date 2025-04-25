@@ -94,6 +94,7 @@ class ExampleState(BaseModel):
     fault_detected:str = ''
     iterations:int = 0
     plant_structure:dict = {}
+    current_state: str = ''
     # df_history:pd.DataFrame = pd.DataFrame()
 
 
@@ -141,36 +142,22 @@ class RouterFlow(Flow[ExampleState]):
             'init_state': 0,
         }
         self.state.plant_structure= {
-            "nodes": [
-                {"id": "B201", "type": "tank"},
-                {"id": "B202", "type": "tank"},
-                {"id": "B203", "type": "tank"},
-                {"id": "B204", "type": "tank"},
-                {"id": "valve_in0", "type": "valve"},
-                {"id": "valve_in1", "type": "valve"},
-                {"id": "valve_in2", "type": "valve"},
-                {"id": "valve_pump_tank_B201", "type": "valve"},
-                {"id": "valve_pump_tank_B202", "type": "valve"},
-                {"id": "valve_pump_tank_B203", "type": "valve"},
-                {"id": "valve_pump_tank_B204", "type": "valve"},
-                {"id": "valve_out", "type": "valve"},
-                {"id": "pump_in", "type": "pump"}
-            ],
-            "edges": [
-                {"from": "valve_in0", "to": "B201"},
-                {"from": "valve_in1", "to": "B202"},
-                {"from": "valve_in2", "to": "B203"},
-                {"from": "B201", "to": "valve_pump_tank_B201"},
-                {"from": "valve_pump_tank_B201", "to": "pump_in"},
-                {"from": "B202", "to": "valve_pump_tank_B202"},
-                {"from": "valve_pump_tank_B202", "to": "pump_in"},
-                {"from": "B203", "to": "valve_pump_tank_B203"},
-                {"from": "valve_pump_tank_B203", "to": "pump_in"},
-                {"from": "pump_in", "to": "valve_pump_tank_B204"},
-                {"from": "valve_pump_tank_B204", "to": "B204"},
-                {"from": "B204", "to": "valve_out"}
-            ]
-        }
+                'valve_in0': 'tank_B201',
+                'tank_B201': 'valve_pump_tank_B201',
+                'valve_in1': 'tank_B202',
+                'tank_B202': 'valve_pump_tank_B202',
+                'valve_in2': 'tank_B203',
+                'tank_B203': 'valve_pump_tank_B203',
+                'valve_pump_tank_B204': 'tank_B204',
+                'tank_B204': 'valve_out',
+                'valve_pump_tank_B201': 'pump_n_in',
+                'valve_pump_tank_B202': 'pump_n_in',
+                'valve_pump_tank_B203': 'pump_n_in',
+                'pump_n_in': 'valve_pump_tank_B204',
+                }
+
+        self.state.current_state = 'fill_tank_B201'
+
     @listen(or_(initialize, "next_itr"))
     def monitoring_agent(self):
         print('Monitoring....')
