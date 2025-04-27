@@ -1,19 +1,17 @@
-# Fault Handling with OpenModelica and LLM Agents 🚀
+# FALCON: Fault-handling Agentic LLMs for Controlled Operations 🚀
 
 ## Overview
-Welcome to an exciting exploration of **fault handling and autonomous decision-making** using **OpenModelica** and **Large Language Models (LLMs)**! 🌟
+Welcome to **FALCON**, an exciting exploration of **fault handling and autonomous decision-making** using **OpenModelica** and **Large Language Models (LLMs)**! 🌟
 
-This repository investigates how LLM agents can interpret **different plant structure representations** (textual descriptions, OpenModelica code, P&IDs, and state graphs) and autonomously suggest fault recovery actions. The project aims to evaluate LLMs' capabilities in understanding and acting upon diverse engineering artifacts, making it a unique blend of **control engineering**, **simulation**, and **AI reasoning**. 🧠🔧
+FALCON investigates how LLM agents can interpret **different plant structure representations** (textual descriptions, OpenModelica code, P&IDs, and state graphs) and autonomously suggest fault recovery actions. The project evaluates LLMs' capabilities in understanding and acting upon diverse engineering artifacts, blending **control engineering**, **simulation**, and **AI reasoning**. 🦰🔧
 
 ## Features ✨
 - **📜 Multi-Representation Input Handling**: Test LLM agents with diverse plant descriptions:
   - Natural language textual descriptions.
   - Raw OpenModelica code.
   - Engineering artifacts like **P&ID diagrams** and **state graphs** (vectorized forms).
-- **🛠️ Agentic Fault Injection**: Automate anomalies into Modelica models to simulate faults.
-- **🔄 Hybrid Simulation**: Combine OpenModelica simulations with Python-based orchestration and analysis.
-- **📊 Data-Driven Analysis**: Use pre-built datasets and configuration files for reproducibility.
-- **🧩 Modular Model Library**: Easily reconfigure plant structures using Source, Sink, Plant, and Mixer components.
+- **🔄 Hybrid Simulation**: Combine OpenModelica simulations with Python-based orchestration.
+
 
 ## Getting Started 🚀
 
@@ -61,7 +59,7 @@ pip install -r requirements.txt
 
 ### 1. Run a Simple Simulation
 ```bash
-python code/trial.py
+python code/mixer_sim.py
 ```
 Executes a predefined scenario and logs OpenModelica outputs.
 
