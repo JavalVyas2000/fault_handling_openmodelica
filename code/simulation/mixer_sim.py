@@ -1,7 +1,7 @@
 import os
 import json
 import pandas as pd
-import utils as u
+import simulation.utils as u
 
 
 def create_sim_setup(mos_path, dict_setup):
@@ -9,7 +9,7 @@ def create_sim_setup(mos_path, dict_setup):
     creating the call.mos file that contains the simulation setup.
     """
     sim_setup = dict_setup["sim_setup"]
-    vanilla_mos_file = u.read_file("vanilla_call.mos")
+    vanilla_mos_file = u.read_file("simulation/vanilla_call.mos")
 
     new_mos_file = []
     for l in vanilla_mos_file:

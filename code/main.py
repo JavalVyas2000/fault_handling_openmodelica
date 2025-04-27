@@ -1,20 +1,18 @@
 import pandas as pd
-from mixer_sim import run_sim
 from crewai.flow.flow import Flow, listen, router, start, or_
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
 
 import sys
 import os
-import time
 
 from crew.operator_crew.action_crew import PlantOperatorCrew
 from crew.strategy_crew.strategy_crew import PlantStrategyCrew
-from digital_twin_simulation import digital_twin
+from simulation.digital_twin_simulation import digital_twin
 from validation_script import action_validation, power_validation
-from mixer_plant import plant
+from simulation.mixer_plant import plant
 
 sys.stdout.reconfigure(encoding="utf-8")
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -258,16 +256,8 @@ class RouterFlow(Flow[ExampleState]):
     @listen(action_agent)
     def digital_twin_agent(self):
         self.state.digital_twin_states = self.state.plant_states.copy()
-        print("Digital Twin....")
-        print("Digital Twin States Before:")
-        print(self.state.digital_twin_states)
-        print(f"anom_clogging: {self.state.anom_clogging}")
-        print(f"anom_valve_in0: {self.state.anom_valve_in0}")
         self.state.digital_twin_states = digital_twin(self.state.digital_twin_states)
         self.state.init_state_list.append(self.state.digital_twin_states["init_state"])
-        print("Digital Twin States:")
-        print(self.state.digital_twin_states)
-        print(self.state.plant_states)
         self.state.B201_level_list.append(self.state.digital_twin_states["B201_level"])
         self.state.B202_level_list.append(self.state.digital_twin_states["B202_level"])
         self.state.B203_level_list.append(self.state.digital_twin_states["B203_level"])
