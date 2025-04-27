@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 import json
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import sys
@@ -12,13 +13,25 @@ import os
 sys.stdout.reconfigure(encoding="utf-8")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
+
 class PlantState(BaseModel):
     # cot: str = Field(..., title="cot", description="chain of thought of the model, how it arrived to the answer.")
-    suggestions: str = Field(..., title="suggestions", description="suggestions of the model, what it thinks should be done.")
-    confirmation: str = Field(..., title="confirmation", description="confirmation that the actions should be retried.")
+    suggestions: str = Field(
+        ...,
+        title="suggestions",
+        description="suggestions of the model, what it thinks should be done.",
+    )
+    confirmation: str = Field(
+        ...,
+        title="confirmation",
+        description="confirmation that the actions should be retried.",
+    )
+
+
 @CrewBase
 class PlantStrategyCrew:
     """Plant Operator Crew"""
+
     ### Words only
     # agents_config = "config/strategy_agent.yaml"
     # tasks_config = "config/reprompting_task.yaml"
@@ -31,7 +44,8 @@ class PlantStrategyCrew:
     agents_config = "config/strategy_agent_pnid.yaml"
     tasks_config = "config/reprompting_task_pnid.yaml"
 
-    llm = ChatOpenAI(model="gpt-4o",temperature=0)
+    llm = ChatOpenAI(model="gpt-4o", temperature=0)
+
     @agent
     def reprompt_agent(self) -> Agent:
         return Agent(

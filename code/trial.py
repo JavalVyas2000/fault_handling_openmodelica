@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 import json
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import sys
@@ -15,18 +16,31 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
+
 class PlantState(BaseModel):
-    cot: str = Field(..., title="cot", description="chain of thought of the model, how it arrived to the answer.")
+    cot: str = Field(
+        ...,
+        title="cot",
+        description="chain of thought of the model, how it arrived to the answer.",
+    )
     valve_in0: float = Field(..., title="valve_in01", description="valve_in01 position")
     valve_in1: float = Field(..., title="valve_in02", description="valve_in02 position")
     valve_in2: float = Field(..., title="valve_in03", description="valve_in03 position")
     valve_out: float = Field(..., title="valve_out", description="valve_out position")
-    valve_pump_tank_B201: float = Field(..., title="valve_pump_tank_B201", description="valve_pump_tank_B201 position")
-    valve_pump_tank_B202: float = Field(..., title="valve_pump_tank_B202", description="valve_pump_tank_B202 position")
-    valve_pump_tank_B203: float = Field(..., title="valve_pump_tank_B203", description="valve_pump_tank_B203 position")
-    valve_pump_tank_B204: float = Field(..., title="valve_pump_tank_B204", description="valve_pump_tank_B204 position")
+    valve_pump_tank_B201: float = Field(
+        ..., title="valve_pump_tank_B201", description="valve_pump_tank_B201 position"
+    )
+    valve_pump_tank_B202: float = Field(
+        ..., title="valve_pump_tank_B202", description="valve_pump_tank_B202 position"
+    )
+    valve_pump_tank_B203: float = Field(
+        ..., title="valve_pump_tank_B203", description="valve_pump_tank_B203 position"
+    )
+    valve_pump_tank_B204: float = Field(
+        ..., title="valve_pump_tank_B204", description="valve_pump_tank_B204 position"
+    )
 
-    
+
 @CrewBase
 class PlantOperatorCrew:
     """Plant Operator Crew"""
@@ -35,6 +49,7 @@ class PlantOperatorCrew:
     tasks_config = "C:/Users/jv624/Desktop/fault_handling_openmodelica/code//crew/config/tasks.yaml"
 
     llm = ChatOpenAI(model="gpt-4o")
+
     @agent
     def plant_operator(self) -> Agent:
         return Agent(
@@ -60,6 +75,7 @@ class PlantOperatorCrew:
             process=Process.sequential,
             verbose=True,
         )
+
 
 if __name__ == "__main__":
     B201_level = 0.033
@@ -101,58 +117,106 @@ if __name__ == "__main__":
     total_output_tokens = 0
     df_history = pd.DataFrame()
 
-    
     for sim_time in range(2):
         print(f"Simulation time: {sim_time}")
-        with open('mixer_sim.json') as f:
+        with open("mixer_sim.json") as f:
             setup = json.load(f)
-        
-        if sim_time==0:
-            setup['ds1']['model']['modules']['mixer0']['init_states']['B201_level']=B201_level
-            setup['ds1']['model']['modules']['mixer0']['init_states']['B202_level']=B202_level
-            setup['ds1']['model']['modules']['mixer0']['init_states']['B203_level']=B203_level
-            setup['ds1']['model']['modules']['mixer0']['init_states']['B204_level']=B204_level
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in0_input']=valve_in0
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in1_input']=valve_in1
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in2_input']=valve_in2
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_out_input']=valve_out
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B201_input']=valve_pump_tank_B201
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B202_input']=valve_pump_tank_B202
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B203_input']=valve_pump_tank_B203
-            setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B204_input']=valve_pump_tank_B204
-            setup['ds1']['model']['modules']['mixer0']['init_states']['init_state']=init_state
+
+        if sim_time == 0:
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "B201_level"
+            ] = B201_level
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "B202_level"
+            ] = B202_level
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "B203_level"
+            ] = B203_level
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "B204_level"
+            ] = B204_level
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_in0_input"
+            ] = valve_in0
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_in1_input"
+            ] = valve_in1
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_in2_input"
+            ] = valve_in2
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_out_input"
+            ] = valve_out
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_pump_tank_B201_input"
+            ] = valve_pump_tank_B201
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_pump_tank_B202_input"
+            ] = valve_pump_tank_B202
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_pump_tank_B203_input"
+            ] = valve_pump_tank_B203
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "valve_pump_tank_B204_input"
+            ] = valve_pump_tank_B204
+            setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+                "init_state"
+            ] = init_state
 
         for i in setup:
-            run_sim(sim_setup=setup[i], modus='hybrid', states=True)
-        
-        df = pd.read_csv('../data/ds1/ds1_hybrid_s.csv')
+            run_sim(sim_setup=setup[i], modus="hybrid", states=True)
 
-        cols = ['mixer0.state_filling_tank_B201.active','mixer0.state_filling_tank_B202.active','mixer0.state_filling_tank_B203.active','mixer0.state_emptying_tank_B201.active','mixer0.state_emptying_tank_B202.active','mixer0.state_emptying_tank_B203.active','mixer0.state_emptying_tank_B204.active']
-        
-        if B201_level<0.032 and B202_level<0.032 and B203_level<0.032 and B204_level<0.023: #### Filling tank B201
+        df = pd.read_csv("../data/ds1/ds1_hybrid_s.csv")
+
+        cols = [
+            "mixer0.state_filling_tank_B201.active",
+            "mixer0.state_filling_tank_B202.active",
+            "mixer0.state_filling_tank_B203.active",
+            "mixer0.state_emptying_tank_B201.active",
+            "mixer0.state_emptying_tank_B202.active",
+            "mixer0.state_emptying_tank_B203.active",
+            "mixer0.state_emptying_tank_B204.active",
+        ]
+
+        if (
+            B201_level < 0.032
+            and B202_level < 0.032
+            and B203_level < 0.032
+            and B204_level < 0.023
+        ):  #### Filling tank B201
             init_state = 0
-        elif B201_level>0.032 and B202_level<0.032 and B203_level<0.032 and B204_level<0.023: #### Filling tank B202
+        elif (
+            B201_level > 0.032
+            and B202_level < 0.032
+            and B203_level < 0.032
+            and B204_level < 0.023
+        ):  #### Filling tank B202
             init_state = 1
-        elif B201_level>0.032 and B202_level>0.032 and B203_level<0.032 and B204_level<0.023: #### Filling tank B203
+        elif (
+            B201_level > 0.032
+            and B202_level > 0.032
+            and B203_level < 0.032
+            and B204_level < 0.023
+        ):  #### Filling tank B203
             init_state = 2
-        elif B204_level>0.021 and B204_level<0.032: ### State emptying tank B201
+        elif B204_level > 0.021 and B204_level < 0.032:  ### State emptying tank B201
             init_state = 3
-        elif B204_level>0.032 and B204_level<0.045: ### State emptying tank B202
+        elif B204_level > 0.032 and B204_level < 0.045:  ### State emptying tank B202
             init_state = 4
-        elif B204_level>0.043 and B204_level<0.056: ### State emptying tank B203
+        elif B204_level > 0.043 and B204_level < 0.056:  ### State emptying tank B203
             init_state = 5
-        elif B204_level<0.056: ### State emptying tank B204
+        elif B204_level < 0.056:  ### State emptying tank B204
             init_state = 6
         print(B201_level, B202_level, B203_level, B204_level)
-        print(f'init_state - {init_state}')
+        print(f"init_state - {init_state}")
         try:
-            B201_level = df['mixer0.tank_B201.level'].iloc[-1]
-            B202_level = df['mixer0.tank_B202.level'].iloc[-1]
-            B203_level = df['mixer0.tank_B203.level'].iloc[-1]
-            B204_level = df['mixer0.tank_B204.level'].iloc[-1]
+            B201_level = df["mixer0.tank_B201.level"].iloc[-1]
+            B202_level = df["mixer0.tank_B202.level"].iloc[-1]
+            B203_level = df["mixer0.tank_B203.level"].iloc[-1]
+            B204_level = df["mixer0.tank_B204.level"].iloc[-1]
         except:
-            print(f'Simtume : {sim_time}')
-            print('Did not produce a valid output')
+            print(f"Simtume : {sim_time}")
+            print("Did not produce a valid output")
             continue
         init_state_list.append(init_state)
         B201_level_list.append(B201_level)
@@ -160,54 +224,61 @@ if __name__ == "__main__":
         B203_level_list.append(B203_level)
         B204_level_list.append(B204_level)
         print(B201_level, B202_level, B203_level, B204_level)
-        fault=''
-        res = PlantOperatorCrew().crew().kickoff(inputs={"B201_level": B201_level, 
-                                                    "B202_level": B202_level, 
-                                                    "B203_level": B203_level, 
-                                                    "B204_level": B204_level, 
-                                                    "valve_in0": valve_in0, 
-                                                    "valve_in1": valve_in1, 
-                                                    "valve_in2": valve_in2, 
-                                                    "valve_out": valve_out, 
-                                                    "valve_pump_tank_B201": valve_pump_tank_B201, 
-                                                    "valve_pump_tank_B202": valve_pump_tank_B202, 
-                                                    "valve_pump_tank_B203": valve_pump_tank_B203, 
-                                                    "valve_pump_tank_B204": valve_pump_tank_B204,
-                                                    "fault_detected": fault})
-        
-        print(res['cot'])
-        print(res['valve_in0'])
-        print(res['valve_in1'])
-        print(res['valve_pump_tank_B201'])
-        print(res['valve_pump_tank_B202'])
-        print(res['valve_pump_tank_B203'])
-        print(res['valve_pump_tank_B204'])
-        valve_in0 = 1 if res['valve_in0'] else 0
-        valve_in1 = 1 if res['valve_in1'] else 0
-        valve_in2 = 1 if res['valve_in2'] else 0
-        valve_out = 1 if res['valve_out'] else 0
-        valve_pump_tank_B201 = 1 if res['valve_pump_tank_B201'] else 0
-        valve_pump_tank_B202 = 1 if res['valve_pump_tank_B202'] else 0
-        valve_pump_tank_B203 = 1 if res['valve_pump_tank_B203'] else 0
-        valve_pump_tank_B204 = 1 if res['valve_pump_tank_B204'] else 0
+        fault = ""
+        res = (
+            PlantOperatorCrew()
+            .crew()
+            .kickoff(
+                inputs={
+                    "B201_level": B201_level,
+                    "B202_level": B202_level,
+                    "B203_level": B203_level,
+                    "B204_level": B204_level,
+                    "valve_in0": valve_in0,
+                    "valve_in1": valve_in1,
+                    "valve_in2": valve_in2,
+                    "valve_out": valve_out,
+                    "valve_pump_tank_B201": valve_pump_tank_B201,
+                    "valve_pump_tank_B202": valve_pump_tank_B202,
+                    "valve_pump_tank_B203": valve_pump_tank_B203,
+                    "valve_pump_tank_B204": valve_pump_tank_B204,
+                    "fault_detected": fault,
+                }
+            )
+        )
+
+        print(res["cot"])
+        print(res["valve_in0"])
+        print(res["valve_in1"])
+        print(res["valve_pump_tank_B201"])
+        print(res["valve_pump_tank_B202"])
+        print(res["valve_pump_tank_B203"])
+        print(res["valve_pump_tank_B204"])
+        valve_in0 = 1 if res["valve_in0"] else 0
+        valve_in1 = 1 if res["valve_in1"] else 0
+        valve_in2 = 1 if res["valve_in2"] else 0
+        valve_out = 1 if res["valve_out"] else 0
+        valve_pump_tank_B201 = 1 if res["valve_pump_tank_B201"] else 0
+        valve_pump_tank_B202 = 1 if res["valve_pump_tank_B202"] else 0
+        valve_pump_tank_B203 = 1 if res["valve_pump_tank_B203"] else 0
+        valve_pump_tank_B204 = 1 if res["valve_pump_tank_B204"] else 0
 
         total_input_tokens += res.token_usage.prompt_tokens
         total_output_tokens += res.token_usage.completion_tokens
         itr_input_tokens = res.token_usage.prompt_tokens
         itr_output_tokens = res.token_usage.completion_tokens
         itr_token = res.token_usage.total_tokens
-        total_tokens+=res.token_usage.total_tokens
+        total_tokens += res.token_usage.total_tokens
 
-
-        message.append(res['cot'])
-        valve_in0_list.append(res['valve_in0'])
-        valve_in1_list.append(res['valve_in1'])
-        valve_in2_list.append(res['valve_in2'])
-        valve_out_list.append(res['valve_out'])
-        valve_pump_tank_B201_list.append(res['valve_pump_tank_B201'])
-        valve_pump_tank_B202_list.append(res['valve_pump_tank_B202'])
-        valve_pump_tank_B203_list.append(res['valve_pump_tank_B203'])
-        valve_pump_tank_B204_list.append(res['valve_pump_tank_B204'])
+        message.append(res["cot"])
+        valve_in0_list.append(res["valve_in0"])
+        valve_in1_list.append(res["valve_in1"])
+        valve_in2_list.append(res["valve_in2"])
+        valve_out_list.append(res["valve_out"])
+        valve_pump_tank_B201_list.append(res["valve_pump_tank_B201"])
+        valve_pump_tank_B202_list.append(res["valve_pump_tank_B202"])
+        valve_pump_tank_B203_list.append(res["valve_pump_tank_B203"])
+        valve_pump_tank_B204_list.append(res["valve_pump_tank_B204"])
         total_input_tokens_list.append(total_input_tokens)
         total_output_tokens_list.append(total_output_tokens)
         total_tokens_list.append(total_tokens)
@@ -216,7 +287,7 @@ if __name__ == "__main__":
         itr_token_list.append(itr_token)
         # df = pd.read_csv('../data/ds1/ds1_hybrid_s.csv')
         print(B201_level, B202_level, B203_level, B204_level)
-        df_history = pd.concat([df_history,df])
+        df_history = pd.concat([df_history, df])
 
         # B201_level = df_history['mixer0.tank_B201.level'].iloc[-1]
         # B202_level = df_history['mixer0.tank_B202.level'].iloc[-1]
@@ -226,41 +297,69 @@ if __name__ == "__main__":
         # B202_level_list.append(df_history['mixer0.tank_B202.level'].iloc[-1])
         # B203_level_list.append(df_history['mixer0.tank_B203.level'].iloc[-1])
         # B204_level_list.append(df_history['mixer0.tank_B204.level'].iloc[-1])
-        setup['ds1']['model']['modules']['mixer0']['init_states']['B201_level']=B201_level#df_history['mixer0.tank_B201.level'].iloc[-1]
-        setup['ds1']['model']['modules']['mixer0']['init_states']['B202_level']=B202_level#df_history['mixer0.tank_B202.level'].iloc[-1]
-        setup['ds1']['model']['modules']['mixer0']['init_states']['B203_level']=B203_level#df_history['mixer0.tank_B203.level'].iloc[-1]
-        setup['ds1']['model']['modules']['mixer0']['init_states']['B204_level']=B204_level#df_history['mixer0.tank_B204.level'].iloc[-1]
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in0_input']= 1 if res['valve_in0'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in1_input']= 1 if res['valve_in1'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_in2_input']= 1 if res['valve_in2'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_out_input']= 1 if res['valve_out'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B201_input']=1 if res['valve_pump_tank_B201'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B202_input']=1 if res['valve_pump_tank_B202'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B203_input']=1 if res['valve_pump_tank_B203'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['valve_pump_tank_B204_input']=1 if res['valve_pump_tank_B204'] else 0
-        setup['ds1']['model']['modules']['mixer0']['init_states']['init_state']=init_state
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "B201_level"
+        ] = B201_level  # df_history['mixer0.tank_B201.level'].iloc[-1]
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "B202_level"
+        ] = B202_level  # df_history['mixer0.tank_B202.level'].iloc[-1]
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "B203_level"
+        ] = B203_level  # df_history['mixer0.tank_B203.level'].iloc[-1]
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "B204_level"
+        ] = B204_level  # df_history['mixer0.tank_B204.level'].iloc[-1]
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"]["valve_in0_input"] = (
+            1 if res["valve_in0"] else 0
+        )
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"]["valve_in1_input"] = (
+            1 if res["valve_in1"] else 0
+        )
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"]["valve_in2_input"] = (
+            1 if res["valve_in2"] else 0
+        )
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"]["valve_out_input"] = (
+            1 if res["valve_out"] else 0
+        )
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "valve_pump_tank_B201_input"
+        ] = (1 if res["valve_pump_tank_B201"] else 0)
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "valve_pump_tank_B202_input"
+        ] = (1 if res["valve_pump_tank_B202"] else 0)
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "valve_pump_tank_B203_input"
+        ] = (1 if res["valve_pump_tank_B203"] else 0)
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "valve_pump_tank_B204_input"
+        ] = (1 if res["valve_pump_tank_B204"] else 0)
+        setup["ds1"]["model"]["modules"]["mixer0"]["init_states"][
+            "init_state"
+        ] = init_state
         with open("mixer_sim.json", "w") as json_file:
             json.dump(setup, json_file, indent=4)
-    df = pd.DataFrame({ 'message': message,
-                        'B201_level': B201_level_list,
-                        'B202_level': B202_level_list,
-                        'B203_level': B203_level_list,
-                        'B204_level': B204_level_list,
-                        'valve_in0': valve_in0_list,
-                        'valve_in1': valve_in1_list,
-                        'valve_in2': valve_in2_list,
-                        'valve_out': valve_out_list,
-                        'valve_pump_tank_B201': valve_pump_tank_B201_list,
-                        'valve_pump_tank_B202': valve_pump_tank_B202_list,
-                        'valve_pump_tank_B203': valve_pump_tank_B203_list,
-                        'valve_pump_tank_B204': valve_pump_tank_B204_list,
-                        'init_state': init_state_list,
-                        'total_input_tokens': total_input_tokens_list,
-                        'total_output_tokens': total_output_tokens_list,
-                        'total_tokens': total_tokens_list,
-                        'itr_input_tokens': itr_input_tokens_list,
-                        'itr_output_tokens': itr_output_tokens_list,
-                        'itr_token': itr_token})
-    df.to_csv('plant_op.csv', index=False)
-
-        
+    df = pd.DataFrame(
+        {
+            "message": message,
+            "B201_level": B201_level_list,
+            "B202_level": B202_level_list,
+            "B203_level": B203_level_list,
+            "B204_level": B204_level_list,
+            "valve_in0": valve_in0_list,
+            "valve_in1": valve_in1_list,
+            "valve_in2": valve_in2_list,
+            "valve_out": valve_out_list,
+            "valve_pump_tank_B201": valve_pump_tank_B201_list,
+            "valve_pump_tank_B202": valve_pump_tank_B202_list,
+            "valve_pump_tank_B203": valve_pump_tank_B203_list,
+            "valve_pump_tank_B204": valve_pump_tank_B204_list,
+            "init_state": init_state_list,
+            "total_input_tokens": total_input_tokens_list,
+            "total_output_tokens": total_output_tokens_list,
+            "total_tokens": total_tokens_list,
+            "itr_input_tokens": itr_input_tokens_list,
+            "itr_output_tokens": itr_output_tokens_list,
+            "itr_token": itr_token,
+        }
+    )
+    df.to_csv("plant_op.csv", index=False)
