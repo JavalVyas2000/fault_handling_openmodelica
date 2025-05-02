@@ -70,8 +70,8 @@ This hybrid approach brings together both structural and behavioral context in a
 
 ### Installation
 ```bash
-git clone https://github.com/JavalVyas2000/fault_handling_openmodelica.git
-cd fault_handling_openmodelica
+git clone https://github.com/AISL-at-Imperial-College-London/fault-handling-agentic-llms-for-controlled-operations.git
+cd fault-handling-agentic-llms-for-controlled-operations
 
 python3 -m venv venv
 source venv/bin/activate  # Linux/macOS
