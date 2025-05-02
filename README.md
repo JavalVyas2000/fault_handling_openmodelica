@@ -113,7 +113,46 @@ python code/main.py
 
 ## Results and Case Studies 📊
 
-We evaluate LLM performance across the three representation formats. Results and visuals are included in the paper and repository.
+We evaluate LLM performance across the three representation formats. 
+
+
+### Table: Performance of GPT-4o across different input representations
+
+| **Metrics**                    | **Text** | **Modelica Code** | **SM + P&ID** |
+|-------------------------------|:--------:|:-----------------:|:-------------:|
+| **Actions Summary**           |          |                   |               |
+| &nbsp;&nbsp;No. of Actions    |   15     |        12         |      14       |
+| &nbsp;&nbsp;No. of Expected Actions | 15  |        15         |      15       |
+| **Action Quality**            |          |                   |               |
+| &nbsp;&nbsp;No. of Correct Actions | 15  |        12         |      14       |
+| &nbsp;&nbsp;No. of Incorrect Valve Actions | 0 |     0           |      0        |
+| &nbsp;&nbsp;No. of Incorrect Pump Actions | 0 |     0           |      0        |
+| &nbsp;&nbsp;No. of Missed Valve Actions   | 0 |     0           |      0        |
+| &nbsp;&nbsp;No. of Missed Pump Actions    | 0 |     3           |      1        |
+| **Efficiency**                |          |                   |               |
+| &nbsp;&nbsp;No. of Reprompts  |   1      |        6          |      5        |
+| **Token Usage**               |          |                   |               |
+| &nbsp;&nbsp;No. of Tokens (K) | 16.2     |       81.4        |     27.2      |
+
+---
+
+### Table: Performance of GPT-4o-mini across different input representations
+
+| **Metrics**                    | **Text** | **Modelica Code** | **SM + P&ID** |
+|-------------------------------|:--------:|:-----------------:|:-------------:|
+| **Actions Summary**           |          |                   |               |
+| &nbsp;&nbsp;No. of Actions    |   13     |        14         |      14       |
+| &nbsp;&nbsp;No. of Expected Actions | 15  |        15         |      15       |
+| **Action Quality**            |          |                   |               |
+| &nbsp;&nbsp;No. of Correct Actions | 13  |        12         |      13       |
+| &nbsp;&nbsp;No. of Incorrect Valve Actions | 0 |     2           |      1        |
+| &nbsp;&nbsp;No. of Incorrect Pump Actions | 0 |     0           |      0        |
+| &nbsp;&nbsp;No. of Missed Valve Actions   | 0 |     0           |      0        |
+| &nbsp;&nbsp;No. of Missed Pump Actions    | 2 |     3           |      2        |
+| **Efficiency**                |          |                   |               |
+| &nbsp;&nbsp;No. of Reprompts  |   6      |       10          |      9        |
+| **Token Usage**               |          |                   |               |
+| &nbsp;&nbsp;No. of Tokens (K) | 33.9     |      113.0        |     40.5      |
 
 - ✅ **Text-Based**: Highest accuracy and fewest reprompts.
 - 🔧 **Modelica Code**: Correct but more error-prone; hard to parse.
