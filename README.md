@@ -1,5 +1,9 @@
 # FALCON: Fault-handling Agentic LLMs for Controlled Operations 🚀
 
+[![Python Version](https://img.shields.io/badge/python-3.12%2B-brightgreen.svg)](https://www.python.org/downloads/release/python-3120/)
+[![OpenModelica](https://img.shields.io/badge/OpenModelica-4.0.0-cyan)]()
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ## Overview
 **FALCON** is a research prototype that explores the integration of **Large Language Models (LLMs)** with simulation-based **Digital Twins** for autonomous fault handling in process plants. Specifically, it evaluates whether LLM agents can interpret system representations like **natural language descriptions**, **OpenModelica code**, and **engineering diagrams** to generate safe and effective **corrective control actions**.
 
@@ -62,7 +66,7 @@ This hybrid approach brings together both structural and behavioral context in a
 
 ### Prerequisites
 - **OpenModelica** v1.13+ ([Installation Guide](https://openmodelica.org/))
-- **Python 3.8+** ([Python Download](https://www.python.org/))
+- **Python >= 3.10 && <3.13** ([Python Download](https://www.python.org/))
 
 ### Installation
 ```bash
