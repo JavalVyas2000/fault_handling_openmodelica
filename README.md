@@ -1,126 +1,135 @@
 # FALCON: Fault-handling Agentic LLMs for Controlled Operations 🚀
 
 ## Overview
-Welcome to **FALCON**, an exciting exploration of **fault handling and autonomous decision-making** using **OpenModelica** and **Large Language Models (LLMs)**! 🌟
+**FALCON** is a research prototype that explores the integration of **Large Language Models (LLMs)** with simulation-based **Digital Twins** for autonomous fault handling in process plants. Specifically, it evaluates whether LLM agents can interpret system representations like **natural language descriptions**, **OpenModelica code**, and **engineering diagrams** to generate safe and effective **corrective control actions**.
 
-FALCON investigates how LLM agents can interpret **different plant structure representations** (textual descriptions, OpenModelica code, P&IDs, and state graphs) and autonomously suggest fault recovery actions. The project evaluates LLMs' capabilities in understanding and acting upon diverse engineering artifacts, blending **control engineering**, **simulation**, and **AI reasoning**. 🦰🔧
+This repository supports a closed-loop interaction between LLM-based agents and a plant simulation model built in OpenModelica, enabling both reasoning and validation of control actions under fault conditions.
+
+📌 **Note:** The OpenModelica model used in this project is adapted from the benchmark process plant simulation introduced in [Ehrhardt et al. (2022)](https://doi.org/10.1109/ETFA52439.2022.9921462) and can be found in the corresponding [original repository](https://github.com/j-ehrhardt/benchmark-for-diagnosis-reconf-planning). We thank the authors for making it publicly available.
+
+---
+
+## Representing Process Plants for LLM Agents 🧠
+
+FALCON examines how LLMs perform when prompted with different representations of a chemical process plant. These include:
+
+### 🔤 1. **Text-Based Descriptions**
+A concise, natural language description of the plant’s **structure**, **function**, and **behavior**. This format provides a human-readable summary, often more accessible for LLMs to reason over due to the linguistic nature of their training.
+
+Example prompt snippet:
+```
+The system consists of four tanks: B201–B204. Liquid flows through controllable valves and is pumped from B201–B203 into B204.
+```
+
+### 📄 2. **OpenModelica Code Representation**
+Raw Modelica code that formally defines plant components and their dynamic interactions. While structurally precise, this representation proved more difficult for LLMs to interpret due to limited exposure to Modelica in their training corpus.
+
+Example excerpt:
+```modelica
+model Plant
+  Tank B201, B202, B203, B204;
+  Valve valve_in0, valve_in1;
+  ...
+equation
+  connect(valve_in0.outlet, B201.inlet);
+  ...
+end Plant;
+```
+
+### 🛠️ 3. **P&ID + State Graph Representation**
+This format uses a **vectorized representation** of engineering diagrams:
+- A **P&ID (Piping and Instrumentation Diagram)** that encodes the plant's structure as a graph (nodes and edges), representing tanks, valves, and pumps.
+- A **State Graph** that defines the expected **control sequence** and associated **transition conditions** (e.g., tank level thresholds).
+
+Example state transition:
+```
+fill_tank_B201 → fill_tank_B202 [if B201 > 0.032m]
+```
+
+This hybrid approach brings together both structural and behavioral context in a graph-like form, which the LLM can interpret with moderate effectiveness.
+
+---
 
 ## Features ✨
-- **📜 Multi-Representation Input Handling**: Test LLM agents with diverse plant descriptions:
-  - Natural language textual descriptions.
-  - Raw OpenModelica code.
-  - Engineering artifacts like **P&ID diagrams** and **state graphs** (vectorized forms).
-- **🔄 Hybrid Simulation**: Combine OpenModelica simulations with Python-based orchestration.
+- 🧠 **LLM Reasoning Loop**: Modular agentic framework using GPT-4o/4o-mini to plan, validate, and reprompt.
+- 🔁 **Closed-Loop Simulation**: OpenModelica is orchestrated from Python to simulate actions and verify outcomes.
+- 🧪 **Fault Scenarios**: Test fault-handling logic in the presence of plant anomalies (e.g., clogging).
+- 🧩 **Prompt Engineering**: Flexible design to insert structured or unstructured plant data into LLM prompts.
 
+---
 
 ## Getting Started 🚀
 
 ### Prerequisites
-- **OpenModelica** v1.13 or later ([Installation Guide](https://openmodelica.org/)).
-- **Python 3.8+** ([Python Official Site](https://www.python.org/)).
+- **OpenModelica** v1.13+ ([Installation Guide](https://openmodelica.org/))
+- **Python 3.8+** ([Python Download](https://www.python.org/))
 
 ### Installation
 ```bash
-# Clone the repository
 git clone https://github.com/JavalVyas2000/fault_handling_openmodelica.git
 cd fault_handling_openmodelica
 
-# (Optional) create and activate a virtual environment
 python3 -m venv venv
 source venv/bin/activate  # Linux/macOS
 venv\Scripts\activate     # Windows
 
-# Install Python dependencies
 pip install -r requirements.txt
 ```
 
-> **Note:** If `requirements.txt` is not provided, install necessary packages manually, e.g., `pandas`, `numpy`, `matplotlib`.
+---
 
-## Project Structure 🏗️
+## Project Structure 📁
 ```
-├── code/            # Python scripts for simulation control and analysis
-│   ├── main.py
-│   ├── mixer_sim.py
-│   └── utils.py
-├── models/          # Modelica component classes
-│   ├── Source.mo
-│   ├── Sink.mo
-│   ├── Plant.mo
-│   └── Mixer.mo
-├── crew/            # CrewAI configuration files
-├── logs/            # Log files for experiments
-├── results/         # Result compilations
-├── .gitignore
-├── requirements.txt # List of Requirements
+├── code/                       # Python orchestration scripts
+│   ├── crew/                   # CrewAI prompt templates and roles        
+│   ├── logs/                   # Logs of LLM-agent interactions
+│   ├── results/                # Control Performance Results
+│   ├── simulation/             # Simulation files
+│   ├── main.py                 # Script to initiate LLM based control actions
+│   └── validation_script.py    # Script to validate the results from digital twin
+├── models/          # Modelica components (source: benchmark repo)
 └── README.md        # This file
 ```
 
+---
+
 ## Usage ⚙️
 
-### 1. Run a Simple Simulation
+### Run OpenModelica Simulation
 ```bash
-python code/mixer_sim.py
+python code/simulation/mixer_sim.py
 ```
-Executes a predefined scenario and logs OpenModelica outputs.
 
-### 2. Invoke Modelica via Python
+### Start LLM-Based Control Loop
 ```bash
-python code/mixer_sim.py
-```
-Loads and simulates the `Mixer.mo` model with fault injections.
-
-### 3. Visualize Results
-```bash
-python code/visualize.py --input simulation.csv
-```
-Generates plots of system behavior over time.
-
-### 4. Utilities
-Additional helper functions for parsing CSVs and orchestrating simulations are available in `code/utils.py`.
-
-## Data Configuration 📈
-- **`ds1_hybrid_s.csv`**: Time-series dataset for hybrid model validation.
-- **`sim_setup.json`**: JSON file specifying simulation parameters (e.g., start/end times, step size).
-
-## Model Library 🏭
-The `models/` directory contains modular Modelica classes:
-- **Source.mo**: Defines input flow or heat source block.
-- **Sink.mo**: Represents output or heat sink.
-- **Plant.mo**: Encapsulates core process dynamics.
-- **Mixer.mo**: Combines multiple streams for mixing tasks.
-
-These components enable building complex and flexible pipelines for fault-handling experiments.
-
-## Results and Images 🖼️
-You are encouraged to add your experimental results here! A good place would be:
-- **After "Usage" Section**: Showcase simulation screenshots, LLM decisions from different representations (text, P&ID, OpenModelica).
-- **Before "Contributing" Section**: Insert a "Gallery" or "Case Studies" section to highlight how the LLM agent handled different plants.
-
-Example layout:
-
-```markdown
-## Case Studies 📚
-### 1. Text-Based Fault Recovery
-*Screenshot/Image + Short description*
-
-### 2. P&ID-Based Fault Recovery
-*Screenshot/Image + Short description*
-
-### 3. OpenModelica Code-Based Recovery
-*Screenshot/Image + Short description*
+python code/main.py
 ```
 
-## Contributing 🤝
-We welcome contributions! Please:
-- Follow Markdown best practices for documentation.
-- Submit clear pull requests based on project structure and coding standards.
+---
 
-## License 📄
-*No license specified.* Please contact the author to discuss usage and redistribution permissions.
+## Results and Case Studies 📊
 
-## Contact 📬
-For questions, feedback, or collaboration inquiries, reach out to:
+We evaluate LLM performance across the three representation formats. Results and visuals are included in the paper and repository.
 
-**Javal Vyas**  
-Email: j.vyas24@imperial.ac.uk  
+- ✅ **Text-Based**: Highest accuracy and fewest reprompts.
+- 🔧 **Modelica Code**: Correct but more error-prone; hard to parse.
+- 🧩 **P&ID + State Graph**: Balanced; rich structural detail with moderate complexity.
+
+---
+
+## Citation & Contact 📬
+
+For academic use, please cite:
+
+```
+@article{gill2025llm,
+  title={Leveraging LLM Agents and Digital Twins for Fault Handling in Process Plants},
+  author={Gill, Milapji Singh and Vyas, Javal and Markaj, Artan and Gehlhoff, Felix and Mercangöz, Mehmet},
+  journal={arXiv preprint arXiv:},
+  year={2025}
+}
+```
+
+**Contact:**  
+Javal Vyas – j.vyas24@imperial.ac.uk  
 LinkedIn: [Javal Vyas](https://www.linkedin.com/in/javal-vyas/)
